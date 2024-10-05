@@ -3,7 +3,7 @@
 import os
 import time
 import openai
-openai.api_key = "sk-proj-A8ilUbtyMXhfLsGzKi9aT3BlbkFJAIWL77g2B1sMv7hwoyXf"
+openai.api_key = "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"
 
 from llama_index.llms.openai import OpenAI
 from llama_index.core.agent import ReActAgent
@@ -42,7 +42,10 @@ base_prompt = """\
     你可以调用 read_entire_codebase 或 query_codebase_content 来获取并进一步分析；
 """
 
-insight_prompt = "我现在有点不知道下一步该做什么。请以游戏策划师的角度思考当前游戏的某个具体的玩法改进，并给出对应的建议和代码修改。"
+insight_prompt = """\
+我现在有点不知道下一步该做什么。请以游戏策划师的角度思考当前游戏的某个具体的玩法改进，\
+并给出对应的建议和代码修改。
+"""
 
 def query_codebase_content(query: str, k: int) -> str:
     """根据 query 寻找当前时刻代码库中的最相关的 k 个代码片段。
@@ -152,22 +155,24 @@ if __name__ == "__main__":
         st.session_state.messages = []
 
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+        avatar = "🤓" if message["role"] == "user" else "🤖"
+        with st.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
     if prompt := st.chat_input("畅谈任何关于游戏的想法 💡"):
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="🤓"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()
             full_response = ""
 
-            response = agent.stream_chat(prompt)
-            print(agent.memory)
-            response_gen = response.response_gen
+            with st.spinner(" Thinking..."):
+                response = agent.stream_chat(prompt)
+                print(agent.memory)
+                response_gen = response.response_gen
 
             for token in response_gen:
                 full_response += token
@@ -183,12 +188,13 @@ if __name__ == "__main__":
         prompt = insight_prompt
         # st.session_state.messages.append({"role": "user", "content": prompt})
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()
             full_response = ""
 
-            response = agent.stream_chat(prompt)
-            response_gen = response.response_gen
+            with st.spinner(" Thinking..."):
+                response = agent.stream_chat(prompt)
+                response_gen = response.response_gen
 
             for token in response_gen:
                 full_response += token
