@@ -1,2 +1,7 @@
-# Retainer
- The Best Natural Language Interface Game Engine.
+### Retainer
+The Best Natural Language Interface Game Engine.
+
+Run
+```bash
+bash main.sh
+```
