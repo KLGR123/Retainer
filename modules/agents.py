@@ -22,6 +22,8 @@ class CodeAgent:
             FunctionTool.from_defaults(fn=read_entire_codebase),
             FunctionTool.from_defaults(fn=delete_file_from_codebase),
             # FunctionTool.from_defaults(fn=query_codebase_content),
+
+            FunctionTool.from_defaults(fn=read_entire_planning),
         ]
 
         with open("modules/prompts/codebase_base.md", "r", encoding="utf-8") as f:
@@ -31,12 +33,16 @@ class CodeAgent:
             self.tools,
             verbose=True,
             context=self.base_prompt,
+            max_iterations=50
         )
 
         self.memory = self.agent.memory
 
     def stream_chat(self, prompt):
         return self.agent.stream_chat(prompt)
+    
+    def get_memory(self):
+        return self.memory.get()
         
 
 class PlanAgent:
@@ -60,9 +66,13 @@ class PlanAgent:
             self.tools,
             verbose=True,
             context=self.base_prompt,
+            max_iterations=50
         )
         
         self.memory = self.agent.memory
 
     def stream_chat(self, prompt):
         return self.agent.stream_chat(prompt)
+
+    def get_memory(self):
+        return self.memory.get()

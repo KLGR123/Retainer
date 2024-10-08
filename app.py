@@ -40,7 +40,7 @@ def show_code_agent():
             message_placeholder = st.empty()
             full_response = ""
 
-            with st.spinner(" Thinking..."):
+            with st.spinner(" Running..."):
                 response = code_agent.stream_chat(prompt)
                 response_gen = response.response_gen
                 
@@ -60,7 +60,7 @@ def show_code_agent():
             message_placeholder = st.empty()
             full_response = ""
             
-            with st.spinner(" Thinking..."):
+            with st.spinner(" Running..."):
                 response = code_agent.stream_chat(prompt)
                 response_gen = response.response_gen
                 
@@ -72,6 +72,7 @@ def show_code_agent():
             
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()
+
 
 def show_plan_agent():
     plan_agent = PlanAgent()
@@ -86,7 +87,7 @@ def show_plan_agent():
     if selected_file:
         with open(os.path.join("assets/scripts", selected_file), "r", encoding="utf-8") as f:
             file_content = json.load(f)
-        st.sidebar.markdown(f"#### {selected_file}")
+        st.sidebar.markdown(f"#### {selected_file[:-5]}")
         st.sidebar.code(json.dumps(file_content, indent=4, ensure_ascii=False), language="json")
 
     if "messages" not in st.session_state:
@@ -107,7 +108,7 @@ def show_plan_agent():
             message_placeholder = st.empty()
             full_response = ""
 
-            with st.spinner(" Thinking..."):
+            with st.spinner(f" Running..."):
                 response = plan_agent.stream_chat(prompt)
                 response_gen = response.response_gen
                 
