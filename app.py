@@ -52,10 +52,13 @@ def show_code_agent():
             for token in response_gen:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
-                
+
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+        if st.session_state.tool_name:
+            st.session_state.messages.append({"role": "assistant", "content": f"使用了工具 {st.session_state.tool_name}"})
+        code_agent.store_memory()
         st.rerun()
 
     if st.sidebar.button("✨"):
@@ -72,7 +75,7 @@ def show_code_agent():
             for token in response_gen:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
-                
+            # code_agent.save_chat()    
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
@@ -121,10 +124,13 @@ def show_plan_agent():
             for token in response_gen:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
-            
+
             message_placeholder.markdown(full_response)
                         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+        if st.session_state.tool_name:
+            st.session_state.messages.append({"role": "assistant", "content": f"使用了工具 {st.session_state.tool_name}"})
+        plan_agent.store_memory()
         st.rerun()
 
 
