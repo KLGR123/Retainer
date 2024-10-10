@@ -5,7 +5,6 @@ from modules.agents import PlanAgent, CodeAgent
 
 
 def tool_called_callback(tool_name):
-    print("tool_name is:", tool_name)
     st.session_state.tool_name = tool_name
 
 
@@ -55,7 +54,7 @@ def show_code_agent():
                 message_placeholder.markdown(full_response + "▌")
                 
             message_placeholder.markdown(full_response)
-            
+
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()
 
@@ -75,7 +74,7 @@ def show_code_agent():
                 message_placeholder.markdown(full_response + "▌")
                 
             message_placeholder.markdown(full_response)
-            
+
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()
 
@@ -124,7 +123,7 @@ def show_plan_agent():
                 message_placeholder.markdown(full_response + "▌")
             
             message_placeholder.markdown(full_response)
-            
+                        
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.rerun()
 

@@ -2,3 +2,5 @@
 *.pyc
 
 .streamlit/config.toml
+
+__pycache__/

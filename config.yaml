@@ -4,4 +4,4 @@ plan_model: "gpt-4"
 code_model: "gpt-4"
 
 plan_temperature: 0.2
-code_temperature: 0.1
+code_temperature: 0
