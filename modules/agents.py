@@ -6,7 +6,7 @@ from llama_index.core.tools import FunctionTool
 from llama_index.core import Settings
 
 from llama_index.core.storage.chat_store import SimpleChatStore
-from llama_index.storage.chat_store.upstash import UpstashChatStore
+# from llama_index.storage.chat_store.upstash import UpstashChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.core.tools import QueryEngineTool
