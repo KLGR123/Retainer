@@ -1,6 +1,6 @@
 .DS_Store
 *.pyc
 
-.streamlit/config.toml
+# .streamlit/config.toml
 
 __pycache__/
