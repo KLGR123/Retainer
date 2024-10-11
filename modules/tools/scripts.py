@@ -46,3 +46,16 @@ def read_entire_planning() -> str:
     
     return planning_content if planning_content else "scripts 中没有找到 .json 文件。"
 
+
+def read_scene_gameplay() -> str:
+    """读取游戏策划中**游戏玩法**的具体内容，返回它。"""
+
+    gameplay_file_path = os.path.join("assets/scripts", "游戏策划.json")
+
+    if os.path.exists(gameplay_file_path):
+        with open(gameplay_file_path, "r", encoding="utf-8") as f:
+            gameplay_content = json.load(f)
+
+        return gameplay_content["游戏玩法"]
+    
+    return "scripts 中没有找到 .json 文件。"
