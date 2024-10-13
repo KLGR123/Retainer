@@ -96,7 +96,7 @@ def show_code_agent():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("⬆️"):
+            if st.button("✅"):
                 for file in new_files.union(modified_files):
                     src = os.path.join("assets/codebase_commit", file)
                     dst = os.path.join("assets/codebase", file)
@@ -111,7 +111,6 @@ def show_code_agent():
         
         with col2:
             if st.button("🗑️"):
-                # TODO: 将 agent memory 同步更新，告知 agent 代码没有被改动，而是废除了
                 if selected_file:
                     commit_path = os.path.join("assets/codebase_commit", selected_file)
                     if os.path.exists(commit_path):
@@ -148,7 +147,12 @@ def show_code_agent():
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        code_agent.store_memory()
+
+        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_current_history_to_memory(current_history)
+        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
+        code_agent.tool_list = []
+
         st.rerun()
 
     if st.sidebar.button("🪄"):
@@ -169,7 +173,12 @@ def show_code_agent():
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        code_agent.store_memory()
+        
+        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_current_history_to_memory(current_history)
+        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
+        code_agent.tool_list = []
+
         st.rerun()
 
 
