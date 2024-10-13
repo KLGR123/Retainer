@@ -15,13 +15,15 @@ from .utils import read_config
 from .tools.codebase import *
 from .tools.scripts import *
 
+import streamlit as st
+
 
 class CodeAgent:
     def __init__(self, memory_token_limit=5000):
         config = read_config()
-        Settings.llm = OpenAI(model=config.get("codebase_model"), 
+        Settings.llm = OpenAI(model=config.get("codebase_model"),
             temperature=config.get("code_temperature"), 
-            api_key=config.get("openai_api_key")
+            api_key=st.secrets["openai_api_key"]
         )
 
         self.chat_store = SimpleChatStore()
@@ -32,7 +34,7 @@ class CodeAgent:
         )
 
         self.intent_history: List[str] = []
-        self.tool_history: List[dict] = []
+        self.tool_history: List[List[dict]] = []
         self.response_history: List[str] = []
 
         self.tools = [
@@ -90,7 +92,7 @@ class PlanAgent:
         config = read_config()
         Settings.llm = OpenAI(model=config.get("plan_model"), 
             temperature=config.get("plan_temperature"), 
-            api_key=config.get("openai_api_key")
+            api_key=st.secrets["openai_api_key"]
         )
 
         self.chat_store = SimpleChatStore()

@@ -10,6 +10,8 @@ from llama_index.core import SimpleDirectoryReader
 
 from .utils import read_config
 
+import streamlit as st
+
 
 class CodebaseQueryEngine:
     def __init__(self, k: int = 1):
@@ -18,7 +20,7 @@ class CodebaseQueryEngine:
         config = read_config()
         Settings.llm = OpenAI(model=config.get("codebase_model"), 
             temperature=config.get("code_temperature"), 
-            api_key=config.get("openai_api_key")
+            api_key=st.secrets["openai_api_key"]
         )
         Settings.embed_model = OpenAIEmbedding()
 
@@ -46,7 +48,7 @@ class CodebaseQueryEngine:
     def query(self, query: str) -> str:
         try:
             return self.query_engine.query(query)
-            
+
         except Exception as e:
             print(f"查询时发生错误: {str(e)}")
             return ""
