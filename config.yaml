@@ -7,3 +7,5 @@ embed_model: "text-embedding-3-small"
 
 plan_temperature: 0.1
 code_temperature: 0
+
+memory_token_limit: 80000
