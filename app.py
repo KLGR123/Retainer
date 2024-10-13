@@ -148,7 +148,12 @@ def show_code_agent():
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        code_agent.store_memory()
+        
+        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_current_history_to_memory(current_history)
+        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
+        code_agent.tool_list = []
+
         st.rerun()
 
     if st.sidebar.button("🪄"):
@@ -169,7 +174,12 @@ def show_code_agent():
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        code_agent.store_memory()
+        
+        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_current_history_to_memory(current_history)
+        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
+        code_agent.tool_list = []
+
         st.rerun()
 
 
@@ -232,7 +242,12 @@ def show_plan_agent():
             message_placeholder.markdown(full_response)
                         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        plan_agent.store_memory()
+        
+        current_history = plan_agent.get_current_history(chat_store_persist_path="./memory/plan_chat_store.json")
+        plan_agent.save_current_history_to_memory(current_history)
+        plan_agent.save_current_history_to_json(current_history, filename='./memory/plan_history_cache.json')
+        plan_agent.tool_list = []
+
         st.rerun()
 
 
