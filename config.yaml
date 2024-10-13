@@ -1,4 +1,4 @@
-openai_api_key: "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"
+openai_api_key: ""
 
 plan_model: "gpt-4"
 code_model: "gpt-4"
