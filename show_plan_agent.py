@@ -39,6 +39,12 @@ def show_plan_agent():
     
     st.sidebar.title("你的游戏策划 📝")
 
+    if st.sidebar.button("⬆️"):
+        with st.spinner("正在上传数据..."):
+            from modules.memory.datastore import datastore
+            datastore(type="plan")
+        st.sidebar.success("数据存储已更新！")
+
     script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".json")]
     selected_file = st.sidebar.selectbox("选择一个文件查看内容", script_files)
 
