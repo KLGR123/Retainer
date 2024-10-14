@@ -7,16 +7,6 @@ from difflib import unified_diff
 from modules.agents import PlanAgent, CodeAgent
 
 
-if not os.path.exists("assets"):
-    os.makedirs("assets")
-
-if not os.path.exists("assets/codebase"):
-    os.makedirs("assets/codebase")
-
-if not os.path.exists("assets/codebase_commit"):
-    os.makedirs("assets/codebase_commit")
-
-
 def tool_called_callback(tool_name):
     st.session_state.tool_name = tool_name
 
@@ -200,4 +190,13 @@ def show_code_agent():
 
 
 if __name__ == "__main__":
+    if not os.path.exists("assets"):
+        os.makedirs("assets")
+
+    if not os.path.exists("assets/codebase"):
+        os.makedirs("assets/codebase")
+
+    if not os.path.exists("assets/codebase_commit"):
+        os.makedirs("assets/codebase_commit")
+
     show_code_agent()
