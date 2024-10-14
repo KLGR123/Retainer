@@ -1,5 +1,4 @@
 streamlit
 llama-index
 openai
-mysqlclient
-SQLAlchemy
+snowflake-snowpark-python

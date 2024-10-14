@@ -40,9 +40,8 @@ def show_plan_agent():
     st.sidebar.title("你的游戏策划 📝")
 
     if st.sidebar.button("⬆️"):
-        with st.spinner("正在上传数据..."):
-            from modules.memory.datastore import datastore
-            datastore(type="plan")
+        from modules.memory.datastore_snowflake import datastore_snowflake
+        datastore_snowflake(type="plan")
         st.sidebar.success("数据存储已更新！")
 
     script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".json")]

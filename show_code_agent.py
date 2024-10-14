@@ -48,9 +48,8 @@ def show_code_agent():
     st.sidebar.title("你的代码库 📂")
 
     if st.sidebar.button("⬆️"):
-        with st.spinner("正在上传数据..."):
-            from modules.memory.datastore import datastore
-            datastore(type="code")
+        from modules.memory.datastore_snowflake import datastore_snowflake
+        datastore_snowflake(type="code")
         st.sidebar.success("数据存储已更新！")
 
     code_files = [f for f in os.listdir("assets/codebase") if f.endswith(".cs")]

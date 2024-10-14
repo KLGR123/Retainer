@@ -4,8 +4,8 @@ from datetime import datetime
 import streamlit as st
 
 
-def datastore(type="plan"):
-    conn = st.connection('mysql', type='sql')
+def datastore_mysql(type="plan"):
+    conn = st.connection("mysql", type="sql")
 
     if type == "plan":
         with open('memory/plan_history_cache.json', 'r') as f:
@@ -49,3 +49,4 @@ def datastore(type="plan"):
                 }, ttl=600)
 
     print("数据已成功插入到MySQL数据库中。")
+    
