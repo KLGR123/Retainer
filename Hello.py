@@ -21,7 +21,7 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.write("## Retainer Bot")
+st.write("## 🕹️ Retainer Bot")
 
 st.sidebar.success("选择你的策划 / 编程助手。")
 
