@@ -11,7 +11,6 @@ if not os.path.exists("assets/codebase"):
 if not os.path.exists("assets/codebase_commit"):
     os.makedirs("assets/codebase_commit")
 
-
 if not os.path.exists("assets/scripts"):
     os.makedirs("assets/scripts")
 

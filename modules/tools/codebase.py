@@ -112,7 +112,7 @@ def write_code_to_file(file_name: str, commit: str) -> str:
 
 
 def delete_file_from_codebase(file_name: str) -> str:
-    """删除文件 file_name 中的全部代码以及文件本身，file_name 应当以 .cs 结尾。"""
+    """删除文件 file_name 中的全部代码以及文件本身，file_name 应当以 .cs 结尾。除非用户明确要求删除文件，否则不要使用该工具。"""
 
     if not file_name.endswith(".cs"):
         file_name += ".cs"

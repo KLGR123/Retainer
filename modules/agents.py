@@ -134,6 +134,7 @@ class CodeAgent(BaseAgent):
             FunctionTool.from_defaults(fn=self._wrap_tool(write_code_to_file)),
             FunctionTool.from_defaults(fn=self._wrap_tool(read_code_from_file)),
             FunctionTool.from_defaults(fn=self._wrap_tool(read_entire_planning)),
+            FunctionTool.from_defaults(fn=self._wrap_tool(delete_file_from_codebase)),
         ]
 
         with open("modules/prompts/codebase_base.md", "r", encoding="utf-8") as f:
