@@ -7,6 +7,13 @@ from difflib import unified_diff
 from modules.agents import PlanAgent, CodeAgent
 
 
+if not os.path.exists("assets"):
+    os.makedirs("assets")
+
+if not os.path.exists("assets/scripts"):
+    os.makedirs("assets/scripts")
+
+
 def tool_called_callback(tool_name):
     st.session_state.tool_name = tool_name
 

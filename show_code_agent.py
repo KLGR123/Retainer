@@ -7,6 +7,16 @@ from difflib import unified_diff
 from modules.agents import PlanAgent, CodeAgent
 
 
+if not os.path.exists("assets"):
+    os.makedirs("assets")
+
+if not os.path.exists("assets/codebase"):
+    os.makedirs("assets/codebase")
+
+if not os.path.exists("assets/codebase_commit"):
+    os.makedirs("assets/codebase_commit")
+
+
 def tool_called_callback(tool_name):
     st.session_state.tool_name = tool_name
 
@@ -14,6 +24,8 @@ def tool_called_callback(tool_name):
 def show_code_agent():
     code_agent = CodeAgent()
     code_agent.set_tool_called_callback(tool_called_callback)
+
+    
 
     with open("modules/prompts/code_insight.md", "r", encoding="utf-8") as f:
         insight_prompt = f.read()
