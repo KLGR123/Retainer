@@ -1,6 +1,6 @@
 .DS_Store
 *.pyc
-
+.gitkeep
 .streamlit/secrets.toml
 
 __pycache__/
