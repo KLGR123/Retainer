@@ -16,10 +16,11 @@ def datastore_snowflake(type="plan"):
                     history = data['history']
                     conn.query("""
                         INSERT INTO PLAN_HISTORY 
-                        (timestamp, chat_store_key, user_content, assistant_content, class_name, tool_used)
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        (timestamp, planning_info, chat_store_key, user_content, assistant_content, class_name, tool_used)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                     """, params=[
                         datetime.strptime(timestamp, '%Y-%m-%d,%H:%M:%S'),
+                        json.dumps(data['planning_info']),
                         history['chat_store_key'],
                         history['user_content'],
                         history['assistant_content'],
@@ -52,7 +53,7 @@ def datastore_snowflake(type="plan"):
                         history['class_name'],
                         json.dumps(history['tool_used'])
                     ], ttl=600)
-                    
+
                 except Exception as e:
                     continue
                     print("数据已成功插入到 Snowflake 数据库中。")

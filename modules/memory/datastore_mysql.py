@@ -16,10 +16,11 @@ def datastore_mysql(type="plan"):
                 history = data['history']
                 conn.query("""
                     INSERT INTO plan_history 
-                    (timestamp, chat_store_key, user_content, assistant_content, class_name, tool_used)
-                    VALUES (:timestamp, :chat_store_key, :user_content, :assistant_content, :class_name, :tool_used)
+                    (timestamp, planning_info, chat_store_key, user_content, assistant_content, class_name, tool_used)
+                    VALUES (:timestamp, :planning_info, :chat_store_key, :user_content, :assistant_content, :class_name, :tool_used)
                 """, params={
                     "timestamp": datetime.strptime(timestamp, '%Y-%m-%d,%H:%M:%S'),
+                    "planning_info": json.dumps(data['planning_info']),
                     "chat_store_key": history['chat_store_key'],
                     "user_content": history['user_content'],
                     "assistant_content": history['assistant_content'],

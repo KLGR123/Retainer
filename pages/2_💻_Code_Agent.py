@@ -15,8 +15,6 @@ def show_code_agent():
     code_agent = CodeAgent()
     code_agent.set_tool_called_callback(tool_called_callback)
 
-    
-
     with open("modules/prompts/code_insight.md", "r", encoding="utf-8") as f:
         insight_prompt = f.read()
 

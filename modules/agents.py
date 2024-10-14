@@ -94,6 +94,11 @@ class BaseAgent:
             history_dict[timestamp]['codebase_info'] = {
                 "entire_codebase": read_entire_codebase()
             }
+        
+        if chat_store_key == 'plan_agent':
+            history_dict[timestamp]['planning_info'] = {
+                "entire_planning": read_entire_planning()
+            }
 
         return history_dict
 

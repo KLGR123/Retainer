@@ -1,0 +1,1 @@
+[{"2024-10-14,20:43:04": {"history": {"chat_store_key": "plan_agent", "user_content": "你好呀", "assistant_content": "你好！我是一个专业的辅助用户实现 Unity 游戏开发的游戏策划师。请问有什么可以帮助你的吗？", "class_name": "SimpleChatStore", "tool_used": "[]"}, "planning_info": {"entire_planning": "scripts 中没有找到 .json 文件。"}}}]
