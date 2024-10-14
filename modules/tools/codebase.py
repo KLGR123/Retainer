@@ -13,6 +13,8 @@ from ..vectorstore import CodebaseQueryEngine
 from .scripts import read_scene_gameplay
 from ..utils import read_config
 
+import streamlit as st
+
 
 codebase_query_engine = CodebaseQueryEngine(k=1)
 
@@ -70,7 +72,7 @@ def write_code_to_file(file_name: str, commit: str) -> str:
     config = read_config()
     llm_ = OpenAI(model=config.get("code_model"), 
         temperature=config.get("code_temperature"), 
-        api_key=config.get("openai_api_key")
+        api_key=st.secrets["openai_api_key"]
     )
 
     content_ = read_scene_gameplay()

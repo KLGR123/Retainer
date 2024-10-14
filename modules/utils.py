@@ -3,6 +3,7 @@ import yaml
 import json
 from datetime import datetime
 
+
 def read_config():
     with open("config.yaml", "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
