@@ -88,10 +88,10 @@ class BaseAgent:
             }
         }
 
-        if chat_store_key == 'code_agent':
-            history_dict[timestamp]['codebase_info'] = {
-                "entire_codebase": read_entire_codebase()
-            }
+        # if chat_store_key == 'code_agent':
+        #     history_dict[timestamp]['codebase_info'] = {
+        #         "entire_codebase": read_entire_codebase()
+        #     }
 
         return history_dict
 
@@ -126,7 +126,11 @@ class CodeAgent(BaseAgent):
         self.tools = [
             FunctionTool.from_defaults(fn=self._wrap_tool(write_code_to_file)),
             FunctionTool.from_defaults(fn=self._wrap_tool(read_code_from_file)),
+            FunctionTool.from_defaults(fn=self._wrap_tool(read_code_from_commit)),
+            FunctionTool.from_defaults(fn=self._wrap_tool(get_filenames_in_codebase_folder)),
+            FunctionTool.from_defaults(fn=self._wrap_tool(get_filenames_in_commit_folder)),
             FunctionTool.from_defaults(fn=self._wrap_tool(read_entire_planning)),
+            FunctionTool.from_defaults(fn=self._wrap_tool(get_code_agent_conversation_history))
         ]
 
         with open("modules/prompts/codebase_base.md", "r", encoding="utf-8") as f:

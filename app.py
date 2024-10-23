@@ -148,11 +148,24 @@ def show_code_agent():
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
+
+
         current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_memory_to_chat_store(persist_path="./memory/code_chat_store_mem.json")
         code_agent.save_current_history_to_memory(current_history)
         code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
         code_agent.tool_list = []
 
+        # ### test
+        # agent_key = code_agent.get_agent_key()
+        # code_agent.chat_store.add_message(agent_key, current_history)
+        # chat_store_getmsg = code_agent.chat_store.get_messages(agent_key)
+        # current_mem = code_agent.memory.get()
+        # all_mem = code_agent.memory.get_all()
+        # print(f"\ncurrent buffer code_agent.memory:{current_mem}")
+        # print(f"\n all buffer code_agent.memory:{all_mem}")
+        # print(f"\n chat_store_getmsg:{chat_store_getmsg}")
+        # ###
         st.rerun()
 
     if st.sidebar.button("🪄"):
@@ -175,6 +188,7 @@ def show_code_agent():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         
         current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_memory_to_chat_store(persist_path="./memory/code_chat_store_mem.json")
         code_agent.save_current_history_to_memory(current_history)
         code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
         code_agent.tool_list = []
@@ -243,6 +257,7 @@ def show_plan_agent():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         
         current_history = plan_agent.get_current_history(chat_store_persist_path="./memory/plan_chat_store.json")
+        plan_agent.save_memory_to_chat_store(persist_path="./memory/plan_chat_store_mem.json")
         plan_agent.save_current_history_to_memory(current_history)
         plan_agent.save_current_history_to_json(current_history, filename='./memory/plan_history_cache.json')
         plan_agent.tool_list = []

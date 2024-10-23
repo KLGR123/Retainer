@@ -39,6 +39,46 @@ def read_code_from_file(file_name: str) -> str:
     
     return f"{file_name} 文件中的代码是：\n```{file_content}```"
 
+def read_code_from_commit(file_name: str) -> str:
+    """读取当前文件 file_name 中的全部 C# 代码，file_name 应当以 .cs 结尾。"""
+
+    if not file_name.endswith(".cs"):
+        file_name += ".cs"
+
+    if not os.path.exists(os.path.join("assets/codebase_commit", file_name)):
+        return f"{file_name} 文件不存在。"
+
+    with open(os.path.join("assets/codebase_commit", file_name), "r", encoding="utf-8") as f:
+        file_content = f.read()
+    
+    return f"{file_name} 文件中的代码是：\n```{file_content}```"
+
+def get_filenames_in_commit_folder(folder_path: str = "assets/codebase_commit") -> str:
+    """列出指定commit文件夹中的所有文件名。"""
+    
+    if not os.path.exists(folder_path):
+        return f"{folder_path} 文件夹不存在。"
+    
+    file_names = []
+    for file_name in os.listdir(folder_path):
+        if os.path.isfile(os.path.join(folder_path, file_name)):
+            file_names.append(file_name)
+    
+    return f"文件夹 {folder_path} 中的文件有：\n{file_names}"
+
+def get_filenames_in_codebase_folder(folder_path: str = "assets/codebase") -> str:
+    """列出指定codebase文件夹中的所有文件名。"""
+    
+    if not os.path.exists(folder_path):
+        return f"{folder_path} 文件夹不存在。"
+    
+    file_names = []
+    for file_name in os.listdir(folder_path):
+        if os.path.isfile(os.path.join(folder_path, file_name)):
+            file_names.append(file_name)
+    
+    return f"文件夹 {folder_path} 中的文件有：\n{file_names}"
+
 
 def read_entire_codebase() -> str:
     """读取整个 codebase 文件夹中的所有 .cs 文件内容，返回文件名和对应的代码内容。用于快速了解整个代码库的结构。"""
@@ -120,3 +160,15 @@ def delete_file_from_codebase(file_name: str) -> str:
 
     os.remove(os.path.join("assets/codebase", file_name))
     return f"{file_name} 删除完成。"
+
+
+def get_code_agent_conversation_history(file_name: str = "memory/code_history_cache.json") -> str:
+    """获取 code agent 的对话历史记录。"""
+
+    if not os.path.exists(file_name):
+        return f"{file_name} 文件不存在。"
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        history = f.read()
+    
+    return f"###对话历史数据:{history}"
