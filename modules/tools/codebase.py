@@ -79,7 +79,6 @@ def get_filenames_in_codebase_folder(folder_path: str = "assets/codebase") -> st
     
     return f"文件夹 {folder_path} 中的文件有：\n{file_names}"
 
-
 def read_entire_codebase() -> str:
     """读取整个 codebase 文件夹中的所有 .cs 文件内容，返回文件名和对应的代码内容。用于快速了解整个代码库的结构。"""
     
