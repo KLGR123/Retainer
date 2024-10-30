@@ -2,5 +2,5 @@
 
 The Best Natural Language Interface Game Engine. Run
 ```bash
-bash main.sh
+streamlit run Hello.py
 ```
