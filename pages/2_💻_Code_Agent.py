@@ -18,6 +18,9 @@ def show_code_agent():
     with open("modules/prompts/code_insight.md", "r", encoding="utf-8") as f:
         insight_prompt = f.read()
 
+    with open("modules/prompts/code_generate.md", "r", encoding="utf-8") as f:
+        generate_prompt = f.read()
+
     st.set_page_config(page_title="Retainer 游戏开发智能助手", page_icon="🎮")
     # st.title("Retainer 代码库智能体 💻")
 
@@ -162,6 +165,32 @@ def show_code_agent():
 
     if st.sidebar.button("🪄"):
         prompt = insight_prompt
+        
+        with st.chat_message("assistant", avatar="🤖"):
+            message_placeholder = st.empty()
+            full_response = ""
+            
+            with st.spinner(f" Running..."):
+                response = code_agent.stream_chat(prompt)
+                response_gen = response.response_gen
+
+            for token in response_gen:
+                full_response += token
+                message_placeholder.markdown(full_response + "▌")
+
+            message_placeholder.markdown(full_response)
+
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        
+        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
+        code_agent.save_current_history_to_memory(current_history)
+        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
+        code_agent.tool_list = []
+
+        st.rerun()
+    
+    if st.sidebar.button("🔁"):
+        prompt = generate_prompt
         
         with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()

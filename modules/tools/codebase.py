@@ -78,7 +78,7 @@ def write_code_to_file(file_name: str, commit: str) -> str:
     content_ = read_scene_gameplay()
 
     template_ = (
-        "你是一个 unity 游戏代码开发专家。给定用户当前代码修改的 commit 需求描述，你需要依据游戏的玩法描述和当前该文件的代码，像一个 c# 专家一样完成/修改它，以满足 commit 需求中的每一点；代码带有明确的注释；你被鼓励尽可能多生成代码；你不被允许留有一些待实现的函数或代码块。\n\n"
+        "你是一个 unity 游戏代码开发专家。给定用户当前代码修改的 commit 需求描述，你需要依据游戏的玩法描述和当前该文件的代码，像一个 c# 专家一样完成/修改它，以满足 commit 需求中的每一点；代码带有明确的注释；你被鼓励尽可能多生成代码；你不被允许留有一些待实现的函数或代码块。需要注意的是，你在写代码的时候如果要命名某个 class，那么该 class 的命名应当与当前文件名保持一致。\n\n"
         "用户的 commit 需求描述是：{commit}\n"
         "当前游戏的玩法描述是：{gameplay_content}\n"
         "当前`{file_name}`文件下的全部代码如下```\n{code}\n```\n"
