@@ -4,7 +4,7 @@ import shutil
 import streamlit as st
 from difflib import unified_diff
 
-from modules.agents import PlanAgent, CodeAgent
+from modules.agents import CodeAgent
 
 
 def tool_called_callback(tool_name):
