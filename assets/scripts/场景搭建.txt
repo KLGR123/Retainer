@@ -1,0 +1,8 @@
+1. 放置背景图片，并在背景上加载背景控制代码
+2. 创建大脚预制体，并在大脚上加载FootControl代码
+3. 创建快速虫子预制体，并在虫子上加载BugControl代码
+4. 创建慢速虫子预制体，并在虫子上加载BugControl代码
+5. 创建游戏控制空物体，并在游戏控制空物体上加载GameControl代码
+6. 创建UI，并加载UIControl代码
+7. 为虫子预制体添加爆浆效果，并加载SplatEffect代码
+8. 在大脚预制体上添加BuffControl代码以实现变大脚Buff效果

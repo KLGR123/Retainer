@@ -14,18 +14,14 @@ if not os.path.exists("assets/codebase_commit"):
 if not os.path.exists("assets/scripts"):
     os.makedirs("assets/scripts")
 
-
 st.set_page_config(
     page_title="Hello",
     page_icon="👋",
 )
 
 st.write("## 🕹️ Retainer Bot")
-
 st.sidebar.success("选择你的策划 / 编程助手。")
-
 st.markdown("<br>", unsafe_allow_html=True)
-
 st.markdown(
     """
     *Retainer 是一个游戏开发助手，可以帮助你完成游戏策划和编程工作。*
@@ -37,7 +33,6 @@ st.markdown(
 )
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-
 st.markdown(
     """
 
@@ -53,7 +48,6 @@ st.markdown(
 )
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-
 st.markdown(
     """
     ###### 📌 帮助我们变得更好

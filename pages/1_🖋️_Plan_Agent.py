@@ -1,50 +1,49 @@
 import os
 import json
-import shutil
 import streamlit as st
-from difflib import unified_diff
 
-from modules.agents import PlanAgent
+from modules.pipelines import PlanPipeline
+from modules.utils import *
 
 
-def tool_called_callback(tool_name):
-    st.session_state.tool_name = tool_name
+def split_plan_json():
+    plan = load_json("assets/plan.json")
+    
+    gameplay = plan["游戏策划"]["游戏玩法"]
+    write_file("assets/scripts/游戏玩法.txt", gameplay)
+    
+    assets = plan["游戏策划"]["所需素材"]
+    assets_text = "\n".join([f"{k}: {v}" for k,v in assets.items()])
+    write_file("assets/scripts/所需素材.txt", assets_text)
+    
+    code = plan["游戏策划"]["所需代码"] 
+    code_text = "\n".join([f"{k}: {v}" for k,v in code.items()])
+    write_file("assets/scripts/所需代码.txt", code_text)
+    
+    scene = plan["场景搭建"]
+    scene_text = "\n".join([f"{i+1}. {step}" for i,step in enumerate(scene)])
+    write_file("assets/scripts/场景搭建.txt", scene_text)
 
 
 def show_plan_agent():
-    plan_agent = PlanAgent()
-    plan_agent.set_tool_called_callback(tool_called_callback)
+    if "plan_pipeline" not in st.session_state:
+        st.session_state.plan_pipeline = PlanPipeline(openai_api_key=st.secrets["openai_api_key"])
 
     st.set_page_config(page_title="Retainer 游戏开发智能助手", page_icon="🎮")
-    # st.title("Retainer 策划智能体 📝")
-
-    st.markdown(
-        """
-        <style>
-        .stApp {{
-            background-image: url("https://unsplash.com/photos/two-red-and-white-dices-a6N685qLsHQ");
-            background-size: cover;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
     st.sidebar.title("你的游戏策划 📝")
 
-    if st.sidebar.button("⬆️"):
-        from modules.memory.datastore_snowflake import datastore_snowflake
+    if st.sidebar.button("⬆️"): # TODO
+        from modules.datastore.datastore_snowflake import datastore_snowflake
         datastore_snowflake(type="plan")
         st.sidebar.success("数据存储已更新！")
 
-    script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".json")]
+    script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".txt")]
     selected_file = st.sidebar.selectbox("选择一个文件查看内容", script_files)
 
     if selected_file:
-        with open(os.path.join("assets/scripts", selected_file), "r", encoding="utf-8") as f:
-            file_content = json.load(f)
-        st.sidebar.markdown(f"#### {selected_file[:-5]}")
-        st.sidebar.code(json.dumps(file_content, indent=4, ensure_ascii=False), language="json")
+        file_content = read_file(os.path.join("assets/scripts", selected_file))
+        st.sidebar.markdown(f"#### {selected_file[:-4]}")
+        st.sidebar.code(file_content, language="text")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -65,30 +64,23 @@ def show_plan_agent():
             full_response = ""
 
             with st.spinner(f" Running..."):
-                response = plan_agent.stream_chat(prompt)
-                response_gen = response.response_gen
+                response = st.session_state.plan_pipeline.step(prompt)
 
-            for token in response_gen:
+            for token in response:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
 
+            full_response = full_response if full_response else "已更新游戏策划。"
             message_placeholder.markdown(full_response)
                         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        
-        current_history = plan_agent.get_current_history(chat_store_persist_path="./memory/plan_chat_store.json")
-        plan_agent.save_current_history_to_memory(current_history)
-        plan_agent.save_current_history_to_json(current_history, filename='./memory/plan_history_cache.json')
-        plan_agent.tool_list = []
+        st.session_state.plan_pipeline.plan_memory.save("memory/plan.json")
+
+        if os.path.exists("assets/plan.json"):
+            split_plan_json()
 
         st.rerun()
 
 
 if __name__ == "__main__":
-    if not os.path.exists("assets"):
-        os.makedirs("assets")
-
-    if not os.path.exists("assets/scripts"):
-        os.makedirs("assets/scripts")
-        
     show_plan_agent()

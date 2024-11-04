@@ -4,42 +4,28 @@ import shutil
 import streamlit as st
 from difflib import unified_diff
 
-from modules.agents import CodeAgent
+from modules.pipelines import CodePipeline
+from modules.utils import *
 
 
-def tool_called_callback(tool_name):
-    st.session_state.tool_name = tool_name
+def split_code_json():
+    with open("assets/code.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
 
+    for key, value in data.items():
+        with open(f"assets/codebase/{key}", "w", encoding="utf-8") as f:
+            f.write(value)
+            
 
 def show_code_agent():
-    code_agent = CodeAgent()
-    code_agent.set_tool_called_callback(tool_called_callback)
-
-    with open("modules/prompts/code_insight.md", "r", encoding="utf-8") as f:
-        insight_prompt = f.read()
-
-    with open("modules/prompts/code_generate.md", "r", encoding="utf-8") as f:
-        generate_prompt = f.read()
+    if "code_pipeline" not in st.session_state:
+        st.session_state.code_pipeline = CodePipeline(openai_api_key=st.secrets["openai_api_key"])
 
     st.set_page_config(page_title="Retainer 游戏开发智能助手", page_icon="🎮")
-    # st.title("Retainer 代码库智能体 💻")
-
-    st.markdown(
-        """
-        <style>
-        .stApp {{
-            background-image: url("https://unsplash.com/photos/two-red-and-white-dices-a6N685qLsHQ");
-            background-size: cover;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     st.sidebar.title("你的代码库 📂")
 
-    if st.sidebar.button("⬆️"):
-        from modules.memory.datastore_snowflake import datastore_snowflake
+    if st.sidebar.button("⬆️"): # TODO
+        from modules.datastore.datastore_snowflake import datastore_snowflake
         datastore_snowflake(type="code")
         st.sidebar.success("数据存储已更新！")
 
@@ -123,6 +109,8 @@ def show_code_agent():
                     commit_path = os.path.join("assets/codebase_commit", selected_file)
                     if os.path.exists(commit_path):
                         os.remove(commit_path)
+                        st.session_state.code_pipeline.pop_step()
+                        st.session_state.code_pipeline.code_memory.save("memory/code.json")
                         st.success(f"{selected_file} 已废除!")
                         st.rerun()
 
@@ -145,85 +133,64 @@ def show_code_agent():
             full_response = ""
 
             with st.spinner(f" Running..."):
-                response = code_agent.stream_chat(prompt)
-                response_gen = response.response_gen
+                response = st.session_state.code_pipeline.step(prompt)
                 
-            for token in response_gen:
+            for token in response:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
 
+            full_response = full_response if full_response else "已更新代码素材。"
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.session_state.code_pipeline.code_memory.save("memory/code.json")
 
-        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
-        code_agent.save_current_history_to_memory(current_history)
-        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
-        code_agent.tool_list = []
+        if os.path.exists("assets/code.json"):
+            split_code_json()
 
         st.rerun()
 
     if st.sidebar.button("🪄"):
-        prompt = insight_prompt
-        
         with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()
             full_response = ""
             
             with st.spinner(f" Running..."):
-                response = code_agent.stream_chat(prompt)
-                response_gen = response.response_gen
+                response = st.session_state.code_pipeline.insight_step()
 
-            for token in response_gen:
+            for token in response:
                 full_response += token
                 message_placeholder.markdown(full_response + "▌")
 
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        
-        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
-        code_agent.save_current_history_to_memory(current_history)
-        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
-        code_agent.tool_list = []
-
+        st.session_state.code_pipeline.code_memory.save("memory/code.json")
         st.rerun()
     
-    if st.sidebar.button("🔁"):
-        prompt = generate_prompt
-        
+    if st.sidebar.button("🔁"):        
         with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()
             full_response = ""
             
             with st.spinner(f" Running..."):
-                response = code_agent.stream_chat(prompt)
-                response_gen = response.response_gen
+                response = st.session_state.code_pipeline.init_step()
 
-            for token in response_gen:
-                full_response += token
-                message_placeholder.markdown(full_response + "▌")
+            for token in response:
+                full_response = token
+                message_placeholder.success("正在生成 "+full_response)
 
+            full_response = "已更新代码素材。"
             message_placeholder.markdown(full_response)
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        
-        current_history = code_agent.get_current_history(chat_store_persist_path="./memory/code_chat_store.json")
-        code_agent.save_current_history_to_memory(current_history)
-        code_agent.save_current_history_to_json(current_history, filename='./memory/code_history_cache.json')
-        code_agent.tool_list = []
+        st.session_state.code_pipeline.code_memory.save("memory/code.json")
+
+        if os.path.exists(f"assets/code.json"):
+            split_code_json()
 
         st.rerun()
 
 
 if __name__ == "__main__":
-    if not os.path.exists("assets"):
-        os.makedirs("assets")
-
-    if not os.path.exists("assets/codebase"):
-        os.makedirs("assets/codebase")
-
-    if not os.path.exists("assets/codebase_commit"):
-        os.makedirs("assets/codebase_commit")
-
     show_code_agent()
