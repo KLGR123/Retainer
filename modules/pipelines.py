@@ -39,19 +39,33 @@ class CodePipeline:
         self.read_plan_node = ReadPlanNode(memory=self.code_memory)
         self.code_writing_node = CodeWritingNode(openai_api_key, memory=self.code_memory, **cfg.code_writing)
         self.code_insight_node = CodeInsightNode(openai_api_key, memory=self.code_memory, **cfg.code_insight)
+        self.code_answer_node = CodeAnswerNode(openai_api_key, memory=self.code_memory, **cfg.code_answer)
+        self.code_switch_node = CodeSwitchNode(openai_api_key, memory=self.code_memory, **cfg.code_switch)
+        self.code_ranking_node = CodeRankingNode(openai_api_key, memory=self.code_memory, **cfg.code_ranking)
 
         self.step_memory_count = 0
 
-    def init_step(self):
-        if not os.path.exists("assets/code.json"):
-            dump_json("assets/code.json", {})
+        if not os.path.exists("assets/code_memo.json"):
+            dump_json("assets/code_memo.json", {})
+        
+        if not os.path.exists("assets/code_buffer.json"):
+            dump_json("assets/code_buffer.json", {})
 
+    def init_step(self):
         initial_memory_len = len(self.code_memory.memory)
         self.read_plan_node.step()
         self.code_memory.add(role="system", content=self.code_writing_prompt)
 
         plan_ = load_json("assets/plan.json")
         code_files = list(plan_["游戏策划"]["所需代码"].keys())
+
+        code_buffer = load_json("assets/code_buffer.json")
+        keys_to_remove = [key for key in code_buffer.keys() if key not in code_files]
+        for key in keys_to_remove:
+            code_buffer.pop(key)
+
+        dump_json("assets/code_buffer.json", code_buffer)
+        dump_json("assets/code_memo.json", code_buffer)
 
         for filename in code_files:
             yield f"{filename}"
@@ -65,11 +79,50 @@ class CodePipeline:
 
     def step(self, query: str):
         initial_memory_len = len(self.code_memory.memory)
-        # TODO
+        mode = self.code_switch_node.step(query)
+
+        if mode == 0:
+            code_files = self.code_ranking_node.step(query)
+            for filename in code_files:
+                # yield f"{filename}"
+                self.code_writing_node.step(filename)
+
+            return list("已更新代码素材。")
+        else:
+            return self.code_answer_node.step(query)
+
         self.step_memory_count = len(self.code_memory.memory) - initial_memory_len
-        return list("已更新代码素材。")
+        
     
     def pop_step(self):
         for _ in range(self.step_memory_count):
             self.code_memory.pop()
+        self.step_memory_count = 0
+
+
+class ImgGenPipeline:
+    def __init__(self, openai_api_key):
+        cfg = OmegaConf.load("config.yaml")
+        
+        self.img_memory = Memory(openai_api_key=openai_api_key, **cfg.img_memory)
+        self.img_base_prompt = read_file("modules/prompts/imggen_base.md")
+        self.img_memory.add(role="system", content=self.img_base_prompt)
+        
+        self.img_gen_node = ImgGenNode(openai_api_key, memory=self.img_memory, **cfg.img_gen)
+        self.img_insight_node = ImgInsightNode(openai_api_key, memory=self.img_memory, **cfg.img_insight)
+        
+        self.step_memory_count = 0
+        
+    def step(self, query: str):
+        initial_memory_len = len(self.img_memory.memory)
+        # TODO
+        self.step_memory_count = len(self.img_memory.memory) - initial_memory_len
+        return list("已更新图片素材。")
+        
+    def insight_step(self):
+        return self.img_insight_node.step()
+        
+    def pop_step(self):
+        for _ in range(self.step_memory_count):
+            self.img_memory.pop()
         self.step_memory_count = 0

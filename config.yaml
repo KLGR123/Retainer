@@ -7,10 +7,10 @@ plan_switch:
 
 plan_writing:
   model: "gpt-4o-2024-08-06"
-  temperature: 0.1
+  temperature: 0.0
 
 plan_answer:
-  model: "gpt-4o-2024-08-06"
+  model: "gpt-4o-mini"
   temperature: 0.2
 
 plan_memory:
@@ -32,3 +32,28 @@ code_writing:
 code_insight:
   model: "gpt-4o"
   temperature: 0.5
+
+code_ranking:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.1
+  k: 1
+
+code_answer:
+  model: "gpt-4o-mini"
+  temperature: 0.2
+  k: 3
+
+code_switch:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0
+  k: 1
+
+img_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"
+
+img_gen:
+  model: "dall-e-3"
+  temperature: -1.0 # deprecated

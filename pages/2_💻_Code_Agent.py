@@ -8,14 +8,12 @@ from modules.pipelines import CodePipeline
 from modules.utils import *
 
 
-def split_code_json():
-    with open("assets/code.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
+def split_code_json() -> None:
+    code_data = load_json("assets/code_buffer.json")
+    for filename, code in code_data.items():
+        with open(os.path.join("assets/codebase_commit", filename), "w", encoding="utf-8") as f:
+            f.write(code)
 
-    for key, value in data.items():
-        with open(f"assets/codebase/{key}", "w", encoding="utf-8") as f:
-            f.write(value)
-            
 
 def show_code_agent():
     if "code_pipeline" not in st.session_state:
@@ -53,7 +51,6 @@ def show_code_agent():
                 modified_files.add(file)
     
     with st.sidebar.expander("`commit`"):
-
         def generate_diff(old_content, new_content):
             diff = unified_diff(
                 old_content.splitlines(), 
@@ -100,19 +97,25 @@ def show_code_agent():
                     file_path = os.path.join("assets/codebase_commit", file)
                     os.remove(file_path)
 
+                code = load_json("assets/code_buffer.json")
+                dump_json("assets/code_memo.json", code)
+                dump_json("assets/code_buffer.json", code)
+
                 st.success("更新完成!")
                 st.rerun()
         
         with col2:
             if st.button("🗑️"):
-                if selected_file:
-                    commit_path = os.path.join("assets/codebase_commit", selected_file)
-                    if os.path.exists(commit_path):
-                        os.remove(commit_path)
-                        st.session_state.code_pipeline.pop_step()
-                        st.session_state.code_pipeline.code_memory.save("memory/code.json")
-                        st.success(f"{selected_file} 已废除!")
-                        st.rerun()
+                for file in os.listdir("assets/codebase_commit"):
+                    file_path = os.path.join("assets/codebase_commit", file)
+                    os.remove(file_path)
+
+                dump_json("assets/code_buffer.json", load_json("assets/code_memo.json"))
+
+                st.session_state.code_pipeline.pop_step()
+                st.session_state.code_pipeline.code_memory.save("memory/code.json")
+                st.success("待提交代码已废除!")
+                st.rerun()
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -145,7 +148,7 @@ def show_code_agent():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.code_pipeline.code_memory.save("memory/code.json")
 
-        if os.path.exists("assets/code.json"):
+        if os.path.exists("assets/code_buffer.json"):
             split_code_json()
 
         st.rerun()
@@ -166,9 +169,17 @@ def show_code_agent():
 
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.code_pipeline.code_memory.save("memory/code.json")
+
+        if os.path.exists("assets/code_buffer.json"):
+            split_code_json()
+
         st.rerun()
     
-    if st.sidebar.button("🔁"):        
+    if st.sidebar.button("🔁"):
+        for file in os.listdir("assets/codebase"):
+            if file.endswith(".cs"):
+                os.remove(os.path.join("assets/codebase", file))
+
         with st.chat_message("assistant", avatar="🤖"):
             message_placeholder = st.empty()
             full_response = ""
@@ -186,7 +197,7 @@ def show_code_agent():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.code_pipeline.code_memory.save("memory/code.json")
 
-        if os.path.exists(f"assets/code.json"):
+        if os.path.exists(f"assets/code_buffer.json"):
             split_code_json()
 
         st.rerun()

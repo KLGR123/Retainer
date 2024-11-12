@@ -1,6 +1,6 @@
-FootControl.cs: 用于控制大脚踩下的代码
-BugControl.cs: 用于控制虫子移动和生成的代码
 GameControl.cs: 用于管理游戏逻辑的代码
-UIControl.cs: 用于管理游戏UI的代码
-SplatEffect.cs: 用于显示虫子爆浆效果的代码
-BuffControl.cs: 用于管理Buff效果的代码
+FootControl.cs: 用于控制大脚踩下动作的代码
+BugControl.cs: 用于控制虫子移动和生成的代码
+ScoreManager.cs: 用于管理和显示分数的代码
+SplatEffect.cs: 用于显示虫子被踩死后爆浆效果的代码
+BuffManager.cs: 用于管理变大脚buff的代码

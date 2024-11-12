@@ -3,4 +3,4 @@ FastBug.png: 快速虫子的图片
 SlowBug.png: 慢速虫子的图片
 Background.png: 背景的图片
 BugSplat.png: 虫子被踩死后爆浆的图片
-BigFoot.png: 变大脚Buff时大脚的图片
+BigFoot.png: 变大后的大脚图片
