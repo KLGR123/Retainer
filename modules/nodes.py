@@ -152,9 +152,9 @@ class CodeWritingNode(LLMNode):
         codes = load_json("assets/code_buffer.json")
 
         if codes.get(filename):
-            memory_.append({"role": "assistant", "content": f"现在，请生成{filename}文件的代码。该文件已有代码内容如下：\n{codes[filename]}"})
+            memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。该文件已有代码内容如下：\n{codes[filename]}"})
         else:
-            memory_.append({"role": "assistant", "content": f"现在，请生成{filename}文件的代码。当前该代码文件为空。"})
+            memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。当前该代码文件为空。"})
         
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -164,6 +164,7 @@ class CodeWritingNode(LLMNode):
         )
 
         response = completion.choices[0].message.content
+        print(f"CODE WRITING INTO {filename}:\n", response) # TODO: remove
         codes[filename] = json.loads(response)["code"]
         dump_json("assets/code_buffer.json", codes)
         self.memory.add(role="assistant", content=response)
@@ -215,13 +216,11 @@ class CodeRankingNode(LLMNode):
         self.memory.add(role="system", content=self.code_ranking_prompt)
         self.memory.add(role="user", content=query)
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_[:self.k]
+        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
 
         codes = load_json("assets/code_buffer.json")
         codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
         memory_.append({"role": "assistant", "content": codes_json})
-
-        print(memory_)
 
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -250,10 +249,9 @@ class CodeSwitchNode(LLMNode):
 
     def step(self, query: str):
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_[:self.k]
+        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
         memory_.append({"role": "user", "content": query})
         memory_.append({"role": "system", "content": self.code_switch_prompt})
-        print(memory_)
 
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -281,11 +279,10 @@ class CodeAnswerNode(LLMNode):
         self.memory.add(role="user", content=query)
 
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_ if len(memory_) <= 3 else [memory_[0]] + memory_[-self.k:]
+        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
         codes = load_json("assets/code_buffer.json")
         codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
         memory_.append({"role": "assistant", "content": codes_json})
-        print(memory_)
 
         completion = self.client.chat.completions.create(
             model=self.model,

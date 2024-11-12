@@ -36,17 +36,17 @@ code_insight:
 code_ranking:
   model: "gpt-4o-2024-08-06"
   temperature: 0.1
-  k: 1
+  k: 5
 
 code_answer:
   model: "gpt-4o-mini"
   temperature: 0.2
-  k: 3
+  k: 5
 
 code_switch:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
-  k: 1
+  k: 3
 
 img_memory:
   max_tokens: 110000

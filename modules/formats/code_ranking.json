@@ -7,7 +7,7 @@
             "properties": {
                 "code_files": {
                     "type": "array",
-                    "description": "代码文件名列表",
+                    "description": "（需要改动的）代码文件名列表",
                     "items": {
                         "type": "string"
                     }
