@@ -93,7 +93,6 @@ class CodePipeline:
 
         self.step_memory_count = len(self.code_memory.memory) - initial_memory_len
         
-    
     def pop_step(self):
         for _ in range(self.step_memory_count):
             self.code_memory.pop()
@@ -105,24 +104,14 @@ class ImgGenPipeline:
         cfg = OmegaConf.load("config.yaml")
         
         self.img_memory = Memory(openai_api_key=openai_api_key, **cfg.img_memory)
-        self.img_base_prompt = read_file("modules/prompts/imggen_base.md")
+
+        self.img_base_prompt = read_file("modules/prompts/img_gen_base.md")
         self.img_memory.add(role="system", content=self.img_base_prompt)
         
+        self.read_plan_node = ReadPlanNode(memory=self.img_memory)
+        self.read_plan_node.step()
+
         self.img_gen_node = ImgGenNode(openai_api_key, memory=self.img_memory, **cfg.img_gen)
-        self.img_insight_node = ImgInsightNode(openai_api_key, memory=self.img_memory, **cfg.img_insight)
-        
-        self.step_memory_count = 0
         
     def step(self, query: str):
-        initial_memory_len = len(self.img_memory.memory)
-        # TODO
-        self.step_memory_count = len(self.img_memory.memory) - initial_memory_len
-        return list("已更新图片素材。")
-        
-    def insight_step(self):
-        return self.img_insight_node.step()
-        
-    def pop_step(self):
-        for _ in range(self.step_memory_count):
-            self.img_memory.pop()
-        self.step_memory_count = 0
+        return self.img_gen_node.step(query)

@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class SplatEffect : MonoBehaviour {
 
-    public float duration = 0.5f; // Duration for which the splat effect is visible
+    public float duration = 0.5f;
 
     void Start()
     {
-        Destroy(gameObject, duration);
+        StartCoroutine(DestroyAfterTime());
+    }
+
+    private IEnumerator DestroyAfterTime()
+    {
+        yield return new WaitForSeconds(duration);
+        Destroy(gameObject);
     }
 }

@@ -4,42 +4,58 @@ using UnityEngine;
 
 public class BugControl : MonoBehaviour {
 
-    public float minSpeed = 1f;
-    public float maxSpeed = 3f;
-    public GameObject slowBugPrefab;
-    public GameObject fastBugPrefab;
-    public GameObject splatEffectPrefab;
-
-    private float speed;
+    public float speed;
+    public int points;
+    private bool isSquashed = false;
 
     void Start()
     {
-        speed = Random.Range(0f, 1f) < 0.7f ? minSpeed : maxSpeed;
-        GameObject bug = speed == minSpeed ? slowBugPrefab : fastBugPrefab;
-        Instantiate(bug, transform.position, Quaternion.identity);
+        // Randomly set speed and points based on bug type
+        if (gameObject.CompareTag("FastBug"))
+        {
+            speed = Random.Range(3f, 5f);
+            points = 2;
+        }
+        else if (gameObject.CompareTag("SlowBug"))
+        {
+            speed = Random.Range(1f, 2f);
+            points = 1;
+        }
     }
 
     void Update()
     {
-        transform.Translate(Vector2.left * speed * Time.deltaTime);
-        if (transform.position.x < -10f) // Assuming -10 is out of screen
+        if (!isSquashed)
         {
+            transform.Translate(Vector2.left * speed * Time.deltaTime);
+        }
+    }
+
+    public void Squash()
+    {
+        if (!isSquashed)
+        {
+            isSquashed = true;
+            GameControl.instance.BugSquashed(points);
+            StartCoroutine(ShowSplatEffect());
+        }
+    }
+
+    private IEnumerator ShowSplatEffect()
+    {
+        // Show splat effect
+        GameObject splat = Instantiate(Resources.Load("Splat") as GameObject, transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(0.5f);
+        Destroy(splat);
+        Destroy(gameObject);
+    }
+
+    private void OnBecameInvisible()
+    {
+        if (!isSquashed)
+        {
+            GameControl.instance.ResetCombo();
             Destroy(gameObject);
         }
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Foot"))
-        {
-            Squash();
-        }
-    }
-
-    void Squash()
-    {
-        Instantiate(splatEffectPrefab, transform.position, Quaternion.identity);
-        GameControl.instance.BugSquashed(speed == minSpeed ? 1 : 2);
-        Destroy(gameObject);
     }
 }

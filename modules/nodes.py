@@ -1,3 +1,4 @@
+import requests
 from copy import deepcopy
 from abc import ABC, abstractmethod
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -304,33 +305,59 @@ class CodeAnswerNode(LLMNode):
 class ImgGenNode(LLMNode):
     def __init__(self, openai_api_key, 
         memory: Memory,
-        model: str = "dall-e-3", 
-        temperature: float = 0.0 # deprecated
+        model: str = "gpt-4o-2024-08-06",
+        img_model: str = "dall-e-3",
+        size: str = "1792x1024",
+        quality: str = "standard",
+        temperature: float = 0.2
     ):
         super().__init__(openai_api_key, model, temperature, memory)
+        self.img_gen_format = load_json("modules/formats/img_gen.json")
+        self.size = size
+        self.img_model = img_model
+        self.quality = quality
 
-    def step(self, prompt: str):
-        completion = self.client.images.generate(
+        if not os.path.exists("assets/images.json"):
+            dump_json("assets/images.json", {})
+
+    def step(self, query: str):
+        self.memory.add(role="user", content=query)
+
+        completion = self.client.chat.completions.create(
             model=self.model,
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
+            temperature=self.temperature,
+            messages=self.memory.memory,
+            response_format=self.img_gen_format
         )
-        image_url = completion.data[0].url
 
-        # 创建保存图片的目录
-        save_dir = "assets/images"
-        os.makedirs(save_dir, exist_ok=True)
-        
-        # 生成文件名（使用时间戳）
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        image_path = os.path.join(save_dir, f"image_{timestamp}.png")
-        
-        # 下载图片
-        response = requests.get(image_url)
-        if response.status_code == 200:
-            with open(image_path, "wb") as f:
-                f.write(response.content)
+        response = completion.choices[0].message.content
+        response_dict = json.loads(response)
+        dump_json("assets/images.json", response_dict)
 
-        return image_url
+        for item in response_dict["images"]:
+            prompt = item["prompt"]
+            filename = item["filename"] 
+            img_type = item["type"]
+
+            assert ".png" in filename
+            yield f"{filename}"
+
+            completion = self.client.images.generate(
+                model=self.img_model,
+                prompt=prompt,
+                size=self.size,
+                quality=self.quality,
+                n=1,
+            )
+
+            image_url = completion.data[0].url
+            response = requests.get(image_url) # TODO: return base64
+
+            if response.status_code == 200:
+                with open(f"assets/images/{filename}", "wb") as f:
+                    f.write(response.content)
+
+            if img_type == 0:
+                remove_bg_with_rembg(f"assets/images/{filename}", f"assets/images/{filename}")
+        
+        return list("已生成图片。")

@@ -55,5 +55,8 @@ img_memory:
   model: "gpt-4o-mini"
 
 img_gen:
-  model: "dall-e-3"
-  temperature: -1.0 # deprecated
+  model: "gpt-4o-2024-08-06"
+  img_model: "dall-e-3"
+  size: "1792x1024" # 1792x1024
+  quality: "standard"
+  temperature: 0.2

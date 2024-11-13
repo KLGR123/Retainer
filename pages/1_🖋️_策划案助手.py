@@ -32,10 +32,10 @@ def show_plan_agent():
     st.set_page_config(page_title="Retainer 游戏开发智能助手", page_icon="🎮")
     st.sidebar.title("你的游戏策划 📝")
 
-    if st.sidebar.button("⬆️"): # TODO
-        from modules.datastore.datastore_snowflake import datastore_snowflake
-        datastore_snowflake(type="plan")
-        st.sidebar.success("数据存储已更新！")
+    # if st.sidebar.button("⬆️"): # TODO
+    #     from modules.datastore.datastore_snowflake import datastore_snowflake
+    #     datastore_snowflake(type="plan")
+    #     st.sidebar.success("数据存储已更新！")
 
     script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".txt")]
     selected_file = st.sidebar.selectbox("选择一个文件查看内容", script_files)

@@ -4,44 +4,80 @@ using UnityEngine;
 
 public class FootControl : MonoBehaviour {
 
-    public GameObject bigFootPrefab;
-    public float stompCooldown = 0.5f;
-    private float lastStompTime;
-    private bool isBigFootActive = false;
+    public static FootControl instance;
+    public float stompSpeed = 5f;
+    public Sprite normalFootSprite;
+    public Sprite bigFootSprite;
+    private Vector2 originalPosition;
+    private bool isStomping = false;
+    private SpriteRenderer spriteRenderer;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void Start()
+    {
+        originalPosition = transform.position;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time > lastStompTime + stompCooldown)
+        if (Input.GetMouseButtonDown(0) && !isStomping)
         {
-            Stomp();
-            lastStompTime = Time.time;
+            StartCoroutine(Stomp());
         }
     }
 
-    void Stomp()
+    private IEnumerator Stomp()
     {
-        Vector3 stompPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        stompPosition.z = 0;
-        if (isBigFootActive)
+        isStomping = true;
+        Vector2 targetPosition = new Vector2(transform.position.x, transform.position.y - 1f);
+
+        while (Vector2.Distance(transform.position, targetPosition) > 0.01f)
         {
-            Instantiate(bigFootPrefab, stompPosition, Quaternion.identity);
+            transform.position = Vector2.MoveTowards(transform.position, targetPosition, stompSpeed * Time.deltaTime);
+            yield return null;
         }
-        else
+
+        yield return new WaitForSeconds(0.1f);
+
+        while (Vector2.Distance(transform.position, originalPosition) > 0.01f)
         {
-            transform.position = stompPosition;
-            // Logic to check for bugs under the foot and squash them
+            transform.position = Vector2.MoveTowards(transform.position, originalPosition, stompSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        isStomping = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        BugControl bug = other.GetComponent<BugControl>();
+        if (bug != null)
+        {
+            bug.Squash();
         }
     }
 
-    public void ActivateBigFoot(float duration)
+    public void ActivateBigFoot()
     {
-        StartCoroutine(BigFootRoutine(duration));
+        spriteRenderer.sprite = bigFootSprite;
+        // Optionally increase the collider size
     }
 
-    private IEnumerator BigFootRoutine(float duration)
+    public void DeactivateBigFoot()
     {
-        isBigFootActive = true;
-        yield return new WaitForSeconds(duration);
-        isBigFootActive = false;
+        spriteRenderer.sprite = normalFootSprite;
+        // Optionally reset the collider size
     }
 }
