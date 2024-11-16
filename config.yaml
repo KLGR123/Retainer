@@ -60,3 +60,13 @@ img_gen:
   size: "1792x1024" # 1792x1024
   quality: "standard"
   temperature: 0.2
+
+scene_gen_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"
+
+scene_gen:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0

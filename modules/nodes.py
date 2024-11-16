@@ -361,3 +361,25 @@ class ImgGenNode(LLMNode):
                 remove_bg_with_rembg(f"assets/images/{filename}", f"assets/images/{filename}")
         
         return list("已生成图片。")
+
+
+class SceneGenNode(LLMNode):
+    def __init__(self, openai_api_key, 
+        memory: Memory,
+        model: str = "gpt-4o-2024-08-06", 
+        temperature: float = 0.0
+    ):
+        super().__init__(openai_api_key, model, temperature, memory)
+        self.scene_gen_format = load_json("modules/formats/scene_gen.json")
+    def step(self):
+        completion = self.client.chat.completions.create(
+            model=self.model,
+            temperature=self.temperature,
+            messages=self.memory.memory,
+            response_format=self.scene_gen_format
+        )
+
+        response = completion.choices[0].message.content
+        response_dict = json.loads(response)
+        dump_json("assets/SampleScene.json", response_dict)
+        return 

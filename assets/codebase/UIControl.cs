@@ -6,23 +6,12 @@ using UnityEngine.UI;
 public class UIControl : MonoBehaviour {
 
     public Text scoreText;
-    public Text comboText;
-    public Text buffText;
-    public GameObject startButton;
-    public GameObject gameOverText;
+    public Text timerText;
+    public GameObject gameOverPanel;
 
     void Start()
     {
-        startButton.SetActive(true);
-        gameOverText.SetActive(false);
-        buffText.gameObject.SetActive(false);
-    }
-
-    public void OnStartButton()
-    {
-        startButton.SetActive(false);
-        gameOverText.SetActive(false);
-        GameControl.instance.OnStartGame();
+        gameOverPanel.SetActive(false);
     }
 
     public void UpdateScore(int score)
@@ -30,22 +19,13 @@ public class UIControl : MonoBehaviour {
         scoreText.text = "Score: " + score.ToString();
     }
 
-    public void UpdateCombo(int combo)
+    public void UpdateTimer(float timeRemaining)
     {
-        comboText.text = "Combo: " + combo.ToString();
+        timerText.text = "Time: " + Mathf.Ceil(timeRemaining).ToString();
     }
 
     public void ShowGameOver()
     {
-        gameOverText.SetActive(true);
-    }
-
-    public void ShowBuffStatus(bool isActive)
-    {
-        buffText.gameObject.SetActive(isActive);
-        if (isActive)
-        {
-            buffText.text = "Big Foot Active!";
-        }
+        gameOverPanel.SetActive(true);
     }
 }

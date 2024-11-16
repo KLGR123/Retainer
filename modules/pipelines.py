@@ -115,3 +115,18 @@ class ImgGenPipeline:
         
     def step(self, query: str):
         return self.img_gen_node.step(query)
+
+
+class SceneGenPipeline:
+    def __init__(self, openai_api_key):
+        cfg = OmegaConf.load("config.yaml")
+
+        self.scene_gen_memory = Memory(openai_api_key=openai_api_key, **cfg.scene_gen_memory)
+        self.scene_gen_node = SceneGenNode(openai_api_key, memory=self.scene_gen_memory, **cfg.scene_gen)
+        self.scene_gen_prompt = read_file("modules/prompts/scene_gen.md")
+        self.scene_gen_memory.add(role="system", content=self.scene_gen_prompt)
+        self.read_plan_node = ReadPlanNode(memory=self.scene_gen_memory)
+        
+    def step(self):
+        self.read_plan_node.step()
+        self.scene_gen_node.step()

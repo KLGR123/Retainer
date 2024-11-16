@@ -7,18 +7,12 @@ public class GameControl : MonoBehaviour {
 
     public static GameControl instance;
     public Text scoreText;
-    public Text comboText;
+    public Text timerText;
     public GameObject gameOverText;
-    public bool gameOver = false;
-    public float spawnRate = 2f;
-    public GameObject slowBugPrefab;
-    public GameObject fastBugPrefab;
-    private int score = 0;
-    private int combo = 0;
-    private float timeSinceLastSpawned;
-    private bool bigFootBuffActive = false;
-    private float bigFootBuffDuration = 5f;
-    private float bigFootBuffTimer = 0f;
+    public int score = 0;
+    public float gameTime = 60f; // Total game time in seconds
+    private float timeRemaining;
+    private bool gameOver = false;
 
     void Awake() 
     {
@@ -30,107 +24,52 @@ public class GameControl : MonoBehaviour {
         {
             Destroy(gameObject);
         }
-        Time.timeScale = 0;
+        timeRemaining = gameTime;
     }
 
     void Start()
     {
         UpdateScoreText();
-        UpdateComboText();
+        UpdateTimerText();
     }
 
     void Update()
     {
         if (!gameOver)
         {
-            timeSinceLastSpawned += Time.deltaTime;
-            if (timeSinceLastSpawned >= spawnRate)
-            {
-                timeSinceLastSpawned = 0;
-                SpawnBug();
-            }
+            timeRemaining -= Time.deltaTime;
+            UpdateTimerText();
 
-            if (bigFootBuffActive)
+            if (timeRemaining <= 0)
             {
-                bigFootBuffTimer += Time.deltaTime;
-                if (bigFootBuffTimer >= bigFootBuffDuration)
-                {
-                    DeactivateBigFootBuff();
-                }
+                EndGame();
             }
         }
     }
 
-    public void OnStartGame()
+    public void MoleHit()
     {
-        Time.timeScale = 1;
-        gameOver = false;
-        score = 0;
-        combo = 0;
-        UpdateScoreText();
-        UpdateComboText();
-    }
-
-    public void OnGameOver()
-    {
-        gameOver = true;
-        gameOverText.SetActive(true);
-    }
-
-    public void BugSquashed(int points)
-    {
-        if (gameOver)
+        if (!gameOver)
         {
-            return;
-        }
-        score += points;
-        combo++;
-        UpdateScoreText();
-        UpdateComboText();
-
-        if (combo >= 10 && !bigFootBuffActive)
-        {
-            ActivateBigFootBuff();
+            score++;
+            UpdateScoreText();
         }
     }
 
-    public void ResetCombo()
-    {
-        combo = 0;
-        UpdateComboText();
-    }
-
-    private void UpdateScoreText()
+    void UpdateScoreText()
     {
         scoreText.text = "Score: " + score.ToString();
     }
 
-    private void UpdateComboText()
+    void UpdateTimerText()
     {
-        comboText.text = "Combo: " + combo.ToString();
+        timerText.text = "Time: " + Mathf.Ceil(timeRemaining).ToString();
     }
 
-    private void SpawnBug()
+    void EndGame()
     {
-        float spawnYPosition = Random.Range(-3f, 3f); // Adjust Y range based on your scene
-        Vector2 spawnPosition = new Vector2(10f, spawnYPosition); // X position is fixed, Y is random
-
-        float randomValue = Random.value;
-        GameObject bugPrefab = randomValue < 0.7f ? slowBugPrefab : fastBugPrefab;
-
-        Instantiate(bugPrefab, spawnPosition, Quaternion.identity);
-    }
-
-    private void ActivateBigFootBuff()
-    {
-        bigFootBuffActive = true;
-        bigFootBuffTimer = 0f;
-        FootControl.instance.ActivateBigFoot();
-    }
-
-    private void DeactivateBigFootBuff()
-    {
-        bigFootBuffActive = false;
-        FootControl.instance.DeactivateBigFoot();
+        gameOver = true;
+        gameOverText.SetActive(true);
+        // Logic to determine if the player advances to the next level or ends the game
     }
 }

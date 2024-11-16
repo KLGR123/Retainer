@@ -2,7 +2,7 @@ import os
 import json
 import streamlit as st
 
-from modules.pipelines import PlanPipeline
+from modules.pipelines import PlanPipeline, SceneGenPipeline
 from modules.utils import *
 
 
@@ -19,13 +19,12 @@ def split_plan_json():
     code = plan["游戏策划"]["所需代码"] 
     code_text = "\n".join([f"{k}: {v}" for k,v in code.items()])
     write_file("assets/scripts/所需代码.txt", code_text)
-    
-    scene = plan["场景搭建"]
-    scene_text = "\n".join([f"{i+1}. {step}" for i,step in enumerate(scene)])
-    write_file("assets/scripts/场景搭建.txt", scene_text)
 
 
 def show_plan_agent():
+    if "scene_gen_pipeline" not in st.session_state:
+        st.session_state.scene_gen_pipeline = SceneGenPipeline(openai_api_key=st.secrets["openai_api_key"])
+
     if "plan_pipeline" not in st.session_state:
         st.session_state.plan_pipeline = PlanPipeline(openai_api_key=st.secrets["openai_api_key"])
 
@@ -44,6 +43,12 @@ def show_plan_agent():
         file_content = read_file(os.path.join("assets/scripts", selected_file))
         st.sidebar.markdown(f"#### {selected_file[:-4]}")
         st.sidebar.code(file_content, language="text")
+
+    if st.sidebar.button("✅ 定稿存档"):
+        st.session_state.scene_gen_pipeline.step()
+        st.session_state.scene_gen_pipeline.scene_gen_memory.save("memory/scene_gen.json")
+        st.sidebar.success("已存档！")
+
 
     if "messages" not in st.session_state:
         st.session_state.messages = []

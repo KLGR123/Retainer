@@ -1,33 +1,23 @@
 {
     "images": [
         {
-            "filename": "Foot.png",
-            "prompt": "A 2D game character of a large cartoonish foot, fully visible, no cropping, flat vector art style with clean lines and solid colors, transparent background, designed for a mobile game, simple yet expressive design, suitable for stomping action, exaggerated size and features, no shading, ideal for game asset.",
+            "filename": "Mole.png",
+            "prompt": "A 2D game character in flat vector art style with clean lines and solid colors, no background, transparent background, depicting a gothic-style mole. The mole should have dark fur, sharp claws, and glowing red eyes, with a sinister expression. It should be fully visible, no cropping, and designed to fit within a 3x3 grid for a whack-a-mole game. The mole should have a slightly hunched posture, with a hint of gothic clothing elements like a small cape or collar.",
             "type": 0
         },
         {
-            "filename": "FastBug.png",
-            "prompt": "A 2D game character of a fast-moving cartoon bug, fully visible, no cropping, flat vector art style with clean lines and solid colors, transparent background, designed for a mobile game, sleek and agile appearance, vibrant colors to indicate speed, no shading, ideal for game asset.",
-            "type": 0
-        },
-        {
-            "filename": "SlowBug.png",
-            "prompt": "A 2D game character of a slow-moving cartoon bug, fully visible, no cropping, flat vector art style with clean lines and solid colors, transparent background, designed for a mobile game, round and sluggish appearance, muted colors to indicate slowness, no shading, ideal for game asset.",
+            "filename": "Hole.png",
+            "prompt": "A 2D game object in flat vector art style with clean lines and solid colors, no background, transparent background, depicting a gothic-style mole hole. The hole should have dark, jagged edges and a shadowy interior, with subtle gothic ornamentation around the rim, such as small spikes or thorn-like patterns. It should be fully visible, no cropping, and designed to fit within a 3x3 grid for a whack-a-mole game.",
             "type": 0
         },
         {
             "filename": "Background.png",
-            "prompt": "A detailed background scene with realistic textures, 4K resolution, concept art style for game design, depicting a simple outdoor setting, such as grass or dirt, suitable for a mobile game, vibrant yet simple colors, no characters or objects, designed to be non-distracting, ideal for game background.",
+            "prompt": "A detailed background scene with realistic textures, 4K resolution, concept art style for game design, depicting a dark gothic landscape. The scene should include a misty graveyard with twisted trees, ancient tombstones, and a full moon casting eerie shadows. The atmosphere should be ominous and mysterious, with a color palette of deep purples, blacks, and grays, suitable for a gothic-themed whack-a-mole game.",
             "type": 1
         },
         {
-            "filename": "Splat.png",
-            "prompt": "A 2D game effect of a bug being squashed, fully visible, no cropping, flat vector art style with clean lines and solid colors, transparent background, designed for a mobile game, exaggerated splat effect with gooey details, vibrant colors to indicate impact, no shading, ideal for game asset.",
-            "type": 0
-        },
-        {
-            "filename": "BigFoot.png",
-            "prompt": "A 2D game character of an enlarged cartoonish foot, fully visible, no cropping, flat vector art style with clean lines and solid colors, transparent background, designed for a mobile game, exaggerated size and features compared to regular foot, simple yet expressive design, no shading, ideal for game asset.",
+            "filename": "Hammer.png",
+            "prompt": "A 2D game object in flat vector art style with clean lines and solid colors, no background, transparent background, depicting a gothic-style hammer. The hammer should have a dark, ornate handle with intricate gothic patterns and a large, heavy head with spikes or skull motifs. It should be fully visible, no cropping, and designed to be used as a tool in a whack-a-mole game, with a sinister and imposing appearance.",
             "type": 0
         }
     ]
