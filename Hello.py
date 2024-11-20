@@ -14,6 +14,9 @@ if not os.path.exists("assets/codebase_commit"):
 if not os.path.exists("assets/scripts"):
     os.makedirs("assets/scripts")
 
+if not os.path.exists("assets/images"):
+    os.makedirs("assets/images")
+
 st.set_page_config(
     page_title="Hello",
     page_icon="👋",
