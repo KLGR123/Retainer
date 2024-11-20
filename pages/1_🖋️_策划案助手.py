@@ -41,8 +41,13 @@ def show_plan_agent():
 
     if selected_file:
         file_content = read_file(os.path.join("assets/scripts", selected_file))
-        st.sidebar.markdown(f"#### {selected_file[:-4]}")
-        st.sidebar.code(file_content, language="text")
+        
+        if selected_file.endswith(".txt"):
+            st.sidebar.markdown(f"#### {selected_file[:-4]}")
+            st.sidebar.code(file_content, language="text")
+        elif selected_file.endswith(".json"):
+            st.sidebar.markdown(f"#### {selected_file[:-5]}")
+            st.sidebar.code(file_content, language="json")
 
     if st.sidebar.button("✅ 定稿存档"):
         st.session_state.scene_gen_pipeline.step()

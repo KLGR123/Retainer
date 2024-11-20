@@ -1,5 +1,0 @@
-Mole.png: 地鼠的图片
-Hole.png: 地洞的图片
-Background.png: 背景的图片
-Hammer.png: 锤子的图片
-ScoreFont.ttf: 用于显示分数的字体文件

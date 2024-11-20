@@ -381,5 +381,5 @@ class SceneGenNode(LLMNode):
 
         response = completion.choices[0].message.content
         response_dict = json.loads(response)
-        dump_json("assets/SampleScene.json", response_dict)
+        dump_json("assets/scripts/SampleScene.json", response_dict)
         return 
