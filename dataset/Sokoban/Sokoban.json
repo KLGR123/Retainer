@@ -1,0 +1,296 @@
+{
+  "name": "Sokoban",
+  "resources": {
+    "scripts": [
+      {
+        "id": "0",
+        "name": "Image"
+      },
+      {
+        "id": "1",
+        "name": "Button"
+      },
+      {
+        "id": "2",
+        "name": "Text"
+      },
+      {
+        "id": "3",
+        "name": "Sokoban"
+      },
+      {
+        "id": "4",
+        "name": "EventSystem"
+      },
+      {
+        "id": "5",
+        "name": "StandaloneInputModule"
+      }
+    ],
+    "sprites": []
+  },
+  "hierarchy": [
+    {
+      "id": "1",
+      "name": "Canvas",
+      "components": [
+        {
+          "localPosition": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "localRotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "localScale": [
+            1.16731513,
+            1.16731513,
+            1.16731513
+          ],
+          "width": 1044.0,
+          "height": 514.0,
+          "type": "RECT_TRANSFORM"
+        },
+        {
+          "localPosition": [
+            0.0,
+            0.0,
+            90.0
+          ],
+          "localRotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "localScale": [
+            1.16731513,
+            1.16731513,
+            1.16731513
+          ],
+          "type": "TRANSFORM"
+        },
+        {
+          "sortOrder": 1,
+          "type": "CANVAS"
+        }
+      ],
+      "children": [
+        {
+          "id": "2",
+          "name": "RestartButton",
+          "components": [
+            {
+              "localPosition": [
+                -454.0,
+                -229.0,
+                0.0
+              ],
+              "localRotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "localScale": [
+                1.0,
+                1.0,
+                1.0
+              ],
+              "width": 105.6,
+              "height": 30.0,
+              "type": "RECT_TRANSFORM"
+            },
+            {
+              "localPosition": [
+                -454.0,
+                -229.0,
+                0.0
+              ],
+              "localRotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "localScale": [
+                1.0,
+                1.0,
+                1.0
+              ],
+              "type": "TRANSFORM"
+            },
+            {
+              "scriptId": "0",
+              "type": "SCRIPT"
+            },
+            {
+              "scriptId": "1",
+              "type": "SCRIPT"
+            }
+          ],
+          "children": [
+            {
+              "id": "3",
+              "name": "Text",
+              "components": [
+                {
+                  "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "width": 0.0,
+                  "height": 0.0,
+                  "type": "RECT_TRANSFORM"
+                },
+                {
+                  "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "type": "TRANSFORM"
+                },
+                {
+                  "text": "",
+                  "fontSize": 14,
+                  "type": "TEXT"
+                },
+                {
+                  "scriptId": "2",
+                  "type": "SCRIPT"
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Game",
+      "components": [
+        {
+          "localPosition": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "localRotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "localScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "type": "TRANSFORM"
+        },
+        {
+          "scriptId": "3",
+          "type": "SCRIPT"
+        }
+      ],
+      "children": []
+    },
+    {
+      "id": "5",
+      "name": "Camera",
+      "components": [
+        {
+          "localPosition": [
+            0.0,
+            0.0,
+            -10.0
+          ],
+          "localRotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "localScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "type": "TRANSFORM"
+        },
+        {
+          "perspective": false,
+          "nearClip": 0.3,
+          "farClip": 1000.0,
+          "fov": 60.0,
+          "height": 600.0,
+          "type": "CAMERA"
+        }
+      ],
+      "children": []
+    },
+    {
+      "id": "6",
+      "name": "EventSystem",
+      "components": [
+        {
+          "localPosition": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "localRotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "localScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "type": "TRANSFORM"
+        },
+        {
+          "scriptId": "4",
+          "type": "SCRIPT"
+        },
+        {
+          "scriptId": "5",
+          "type": "SCRIPT"
+        }
+      ],
+      "children": []
+    }
+  ]
+}
