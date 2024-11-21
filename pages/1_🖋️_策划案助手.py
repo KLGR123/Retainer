@@ -36,7 +36,7 @@ def show_plan_agent():
     #     datastore_snowflake(type="plan")
     #     st.sidebar.success("数据存储已更新！")
 
-    script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".txt")]
+    script_files = [f for f in os.listdir("assets/scripts") if f.endswith(".txt") or f.endswith(".json")]
     selected_file = st.sidebar.selectbox("选择一个文件查看内容", script_files)
 
     if selected_file:
