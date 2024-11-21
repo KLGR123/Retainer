@@ -17,6 +17,9 @@ if not os.path.exists("assets/scripts"):
 if not os.path.exists("assets/images"):
     os.makedirs("assets/images")
 
+if not os.path.exists("memory"):
+    os.makedirs("memory")
+
 if not os.path.exists("memory/plan.json"):
     with open("memory/plan.json", "w") as f:
         f.write("{}")
