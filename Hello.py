@@ -68,6 +68,9 @@ if st.sidebar.button("🔄 重新开始"):
         with open("memory/img_gen.json", "w") as f:
             f.write("{}")
 
+    with open("assets/plan.json", "w") as f:
+        f.write("{}")
+
     st.sidebar.success("已重新开始！")
     st.rerun()
 

@@ -5,15 +5,13 @@
         "schema": {
             "type": "object",
             "properties": {
-                "properties": {
-                    "filename": {
-                        "type": "string",
-                        "description": "C# 代码文件名"
-                    },
-                    "code": {
-                        "type": "string",
-                        "description": "C# 代码"        
-                    }
+                "filename": {
+                    "type": "string",
+                    "description": "C# 代码文件名"
+                },
+                "code": {
+                    "type": "string",
+                    "description": "C# 代码"        
                 }
             }
         }

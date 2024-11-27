@@ -45,10 +45,10 @@ class CodePipeline:
 
         self.step_memory_count = 0
 
-        if not os.path.exists("assets/code_memo.json"):
+        if not os.path.exists("assets/code_memo.json"): # TODO
             dump_json("assets/code_memo.json", {})
         
-        if not os.path.exists("assets/code_buffer.json"):
+        if not os.path.exists("assets/code_buffer.json"): # TODO
             dump_json("assets/code_buffer.json", {})
 
     def init_step(self):
@@ -56,16 +56,16 @@ class CodePipeline:
         self.read_plan_node.step()
         self.code_memory.add(role="system", content=self.code_writing_prompt)
 
-        plan_ = load_json("assets/plan.json")
+        plan_ = load_json("assets/plan.json") # TODO
         code_files = list(plan_["游戏策划"]["所需代码"].keys())
 
-        code_buffer = load_json("assets/code_buffer.json")
+        code_buffer = load_json("assets/code_buffer.json") # TODO
         keys_to_remove = [key for key in code_buffer.keys() if key not in code_files]
         for key in keys_to_remove:
             code_buffer.pop(key)
 
-        dump_json("assets/code_buffer.json", code_buffer)
-        dump_json("assets/code_memo.json", code_buffer)
+        dump_json("assets/code_buffer.json", code_buffer) # TODO
+        dump_json("assets/code_memo.json", code_buffer) # TODO
 
         for filename in code_files:
             yield f"{filename}"
@@ -101,10 +101,9 @@ class CodePipeline:
 
 class ImgGenPipeline:
     def __init__(self, openai_api_key):
-        cfg = OmegaConf.load("config.yaml")
+        cfg = OmegaConf.load("config.yaml") # TODO
         
         self.img_memory = Memory(openai_api_key=openai_api_key, **cfg.img_memory)
-
         self.img_base_prompt = read_file("modules/prompts/img_gen_base.md")
         self.img_memory.add(role="system", content=self.img_base_prompt)
         
@@ -119,7 +118,7 @@ class ImgGenPipeline:
 
 class SceneGenPipeline:
     def __init__(self, openai_api_key):
-        cfg = OmegaConf.load("config.yaml")
+        cfg = OmegaConf.load("config.yaml") # TODO
 
         self.scene_gen_memory = Memory(openai_api_key=openai_api_key, **cfg.scene_gen_memory)
         self.scene_gen_node = SceneGenNode(openai_api_key, memory=self.scene_gen_memory, **cfg.scene_gen)

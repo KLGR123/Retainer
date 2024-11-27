@@ -94,7 +94,7 @@ class PlanWritingNode(LLMNode):
         response = completion.choices[0].message.content
         response_dict = json.loads(response)
         response_dict = json.loads(json.dumps(response_dict).replace('\\n', ''))
-        dump_json("assets/plan.json", response_dict)
+        dump_json("assets/plan.json", response_dict) # TODO
 
         self.memory.add(role="assistant", content=response)
         return response
@@ -133,7 +133,7 @@ class ReadPlanNode(BaseNode):
         super().__init__(memory)
 
     def step(self):
-        plan = load_json("assets/plan.json")
+        plan = load_json("assets/plan.json") # TODO
         response = "当前已有策划案内容如下：\n" + str(plan) if plan else "当前没有策划案，请先生成。"
         self.memory.add(role="assistant", content=response)
         return response
@@ -150,7 +150,7 @@ class CodeWritingNode(LLMNode):
 
     def step(self, filename: str):
         memory_ = deepcopy(self.memory.memory)
-        codes = load_json("assets/code_buffer.json")
+        codes = load_json("assets/code_buffer.json") # TODO
 
         if codes.get(filename):
             memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。该文件已有代码内容如下：\n{codes[filename]}"})
@@ -165,14 +165,16 @@ class CodeWritingNode(LLMNode):
         )
 
         response = completion.choices[0].message.content
-        print(f"CODE WRITING INTO {filename}:\n", response) # TODO: remove
+        print(f"CODE WRITING INTO {filename}:\n", response)
         codes[filename] = json.loads(response)["code"]
-        dump_json("assets/code_buffer.json", codes)
+        dump_json("assets/code_buffer.json", codes) # TODO
         self.memory.add(role="assistant", content=response)
         return response
 
 
 class CodeInsightNode(LLMNode):
+    # Deprecated
+
     def __init__(self, openai_api_key,
         memory: Memory,
         model: str = "gpt-4o-2024-08-06", 
@@ -219,7 +221,7 @@ class CodeRankingNode(LLMNode):
         memory_ = deepcopy(self.memory.memory)
         memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
 
-        codes = load_json("assets/code_buffer.json")
+        codes = load_json("assets/code_buffer.json") # TODO
         codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
         memory_.append({"role": "assistant", "content": codes_json})
 
@@ -281,7 +283,7 @@ class CodeAnswerNode(LLMNode):
 
         memory_ = deepcopy(self.memory.memory)
         memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
-        codes = load_json("assets/code_buffer.json")
+        codes = load_json("assets/code_buffer.json") # TODO
         codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
         memory_.append({"role": "assistant", "content": codes_json})
 
@@ -317,9 +319,6 @@ class ImgGenNode(LLMNode):
         self.img_model = img_model
         self.quality = quality
 
-        if not os.path.exists("assets/images.json"):
-            dump_json("assets/images.json", {})
-
     def step(self, query: str):
         self.memory.add(role="user", content=query)
 
@@ -332,7 +331,7 @@ class ImgGenNode(LLMNode):
 
         response = completion.choices[0].message.content
         response_dict = json.loads(response)
-        dump_json("assets/images.json", response_dict)
+        dump_json("assets/images.json", response_dict) # TODO
 
         for item in response_dict["images"]:
             prompt = item["prompt"]
@@ -351,10 +350,10 @@ class ImgGenNode(LLMNode):
             )
 
             image_url = completion.data[0].url
-            response = requests.get(image_url) # TODO: return base64
+            response = requests.get(image_url) # return base64
 
             if response.status_code == 200:
-                with open(f"assets/images/{filename}", "wb") as f:
+                with open(f"assets/images/{filename}", "wb") as f: # TODO
                     f.write(response.content)
 
             if img_type == 0:
@@ -371,6 +370,7 @@ class SceneGenNode(LLMNode):
     ):
         super().__init__(openai_api_key, model, temperature, memory)
         self.scene_gen_format = load_json("modules/formats/scene_gen.json")
+
     def step(self):
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -381,5 +381,5 @@ class SceneGenNode(LLMNode):
 
         response = completion.choices[0].message.content
         response_dict = json.loads(response)
-        dump_json("assets/scripts/SampleScene.json", response_dict)
+        dump_json("assets/scripts/SampleScene.json", response_dict) # TODO
         return 
