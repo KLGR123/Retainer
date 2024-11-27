@@ -1,7 +1,72 @@
-openai_api_key: ""
+openai_api_key: "" # .streamlit/secrets.toml
 
-plan_model: "gpt-4"
-code_model: "gpt-4"
+plan_switch:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0
+  k: 3
 
-plan_temperature: 0.2
-code_temperature: 0
+plan_writing:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0
+
+plan_answer:
+  model: "gpt-4o-mini"
+  temperature: 0.2
+
+plan_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.3
+  model: "gpt-4o-mini"
+
+code_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"
+
+code_writing:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0
+
+code_insight:
+  model: "gpt-4o"
+  temperature: 0.5
+
+code_ranking:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.1
+  k: 5
+
+code_answer:
+  model: "gpt-4o-mini"
+  temperature: 0.2
+  k: 5
+
+code_switch:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0
+  k: 3
+
+img_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"
+
+img_gen:
+  model: "gpt-4o-2024-08-06"
+  img_model: "dall-e-3"
+  size: "1792x1024" # 1792x1024
+  quality: "standard"
+  temperature: 0.2
+
+scene_gen_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"
+
+scene_gen:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.0

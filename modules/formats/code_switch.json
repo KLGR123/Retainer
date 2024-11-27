@@ -1,0 +1,16 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "code_switch_schema",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "type": "integer",
+                    "description": "数字 0 或 1"
+                }
+            },
+            "required": ["mode"]
+        }
+    }
+}

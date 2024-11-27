@@ -12,14 +12,12 @@ public class Bird : MonoBehaviour
     private Rigidbody2D rb2d;
     private Animator anim;
     
-    // Use this for initialization
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D> ();
         anim = GetComponent<Animator> ();
     }
     
-    // Update is called once per frame
     void Update()
     {
         if (isDead == false)
@@ -44,9 +42,6 @@ public class Bird : MonoBehaviour
 
     void OnCollisionEnter2D()
     {
-        // Debug.Log("Player #: " + player_num);
-        // Debug.Log("players: " + num_players);
-
         if (isDead == false && player_num == 0)
         {
             rb2d.velocity = Vector2.zero;
@@ -58,4 +53,3 @@ public class Bird : MonoBehaviour
     }
 
 }
-

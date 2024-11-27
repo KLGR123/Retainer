@@ -11,7 +11,6 @@ public class GameControl : MonoBehaviour {
     public Text scoreText;
     public bool gameOver = false;
     public float scrollSpeed = -1.5f;
-
     private int score = 0;
 
 	void Awake () 
@@ -19,9 +18,10 @@ public class GameControl : MonoBehaviour {
         if (instance == null)
         {
             instance = this;
-        }else if (instance != this)
+        }
+        else if (instance != this)
         {
-            Destroy (gameObject);
+            Destroy(gameObject);
         }
         Time.timeScale = 0;
 	}
@@ -51,6 +51,4 @@ public class GameControl : MonoBehaviour {
         gameOver = true;       
         gameOverText.SetActive(true);
     }
-
-
 }

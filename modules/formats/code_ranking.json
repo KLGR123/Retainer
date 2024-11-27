@@ -1,0 +1,19 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "code_ranking_schema", 
+        "schema": {
+            "type": "object",
+            "properties": {
+                "code_files": {
+                    "type": "array",
+                    "description": "（需要改动的）代码文件名列表",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["code_files"]
+        }
+    }
+}
