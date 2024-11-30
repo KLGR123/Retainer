@@ -1,4 +1,5 @@
 import os
+import json
 import streamlit as st
 
 
@@ -69,7 +70,14 @@ if st.sidebar.button("🔄 重新开始"):
             f.write("{}")
 
     with open("assets/plan.json", "w") as f:
-        f.write("{}")
+        plan_structure = {
+            "游戏策划": {
+                "游戏玩法": "",
+                "所需素材": {},
+                "所需代码": {}
+            }
+        }
+        f.write(json.dumps(plan_structure, ensure_ascii=False, indent=4))
 
     st.sidebar.success("已重新开始！")
     st.rerun()
