@@ -53,13 +53,14 @@ def show_plan_agent():
         st.session_state.scene_gen_pipeline.step()
         st.session_state.scene_gen_pipeline.scene_gen_memory.save("memory/scene_gen.json")
         st.sidebar.success("已存档！")
+        st.rerun()
 
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
     for message in st.session_state.messages:
-        avatar = "🥸" if message["role"] == "user" else "🤖"
+        avatar = "🥸" if message["role"] == "user" else "🕹️"
         with st.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
@@ -69,7 +70,7 @@ def show_plan_agent():
         with st.chat_message("user", avatar="🥸"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant", avatar="🤖"):
+        with st.chat_message("assistant", avatar="🕹️"):
             message_placeholder = st.empty()
             full_response = ""
 

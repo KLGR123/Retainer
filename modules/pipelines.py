@@ -113,7 +113,10 @@ class ImgGenPipeline:
         self.img_gen_node = ImgGenNode(openai_api_key, memory=self.img_memory, **cfg.img_gen)
         
     def step(self, query: str):
-        return self.img_gen_node.step(query)
+        try:
+            return self.img_gen_node.step(query)
+        except requests.exceptions.RequestException as e:
+            return ["网络错误，请重试。"]
 
 
 class SceneGenPipeline:

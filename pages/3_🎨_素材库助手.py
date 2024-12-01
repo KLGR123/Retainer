@@ -9,7 +9,9 @@ def show_art_agent():
         st.session_state.img_pipeline = ImgGenPipeline(openai_api_key=st.secrets["openai_api_key"])
 
     st.set_page_config(page_title="Retainer 游戏开发智能助手", page_icon="🎮")
-    st.markdown("#### 你的美术素材库 🖼️")
+    st.markdown("#### 你的美术素材 🎨")
+
+    message_placeholder = st.empty()
 
     image_files = [f for f in os.listdir("assets/images") if f.endswith((".png", ".jpg", ".jpeg"))]
     if image_files:
@@ -20,7 +22,7 @@ def show_art_agent():
                 st.image(image_path, use_column_width=True)
                 st.caption(image_file)
     else:
-        st.info("暂无图片素材，请生成新的图片。")
+        message_placeholder.success("暂无图片素材，请生成新的图片。")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -31,7 +33,7 @@ def show_art_agent():
         
         for token in response:
             full_response = token
-            st.info("正在生成 "+full_response)
+            message_placeholder.markdown("正在生成 "+full_response)
 
         st.session_state.img_pipeline.img_memory.save("memory/img_gen.json")
         st.rerun()
@@ -53,7 +55,7 @@ def show_art_agent():
         
         for token in response:
             full_response = token
-            st.info("正在生成 "+full_response)
+            st.success("正在生成 "+full_response)
 
         st.session_state.img_pipeline.img_memory.save("memory/img_gen.json")
 
