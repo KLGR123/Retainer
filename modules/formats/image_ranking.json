@@ -1,0 +1,19 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "image_ranking_schema", 
+        "schema": {
+            "type": "object",
+            "properties": {
+                "image_files": {
+                    "type": "array",
+                    "description": "（需要改动的）图片文件名列表",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["image_files"]
+        }
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "image_gen_schema", 
+        "schema": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "description": "素材文件名"
+                },
+                "prompt": {
+                    "type": "string",
+                    "description": "对应的 stable diffusion prompt"
+                },
+                "type": {
+                    "type": "integer",
+                    "description": "素材类型，数字 0 或 1，0 表示角色或物体等，1 表示背景"
+                }
+            }
+        }
+    }
+}

@@ -1,8 +1,8 @@
 from omegaconf import OmegaConf
 
 from .nodes import *
-from .memory import Memory
 from .utils import *
+from .memory import BaseMemory
 
 
 class PlanPipeline:
@@ -10,128 +10,222 @@ class PlanPipeline:
         cfg = OmegaConf.load("config.yaml")
         openai_api_key = cfg.openai_api_key
 
-        self.plan_memory = Memory(openai_api_key=openai_api_key, **cfg.plan_memory)
+        self.plan = {}
+        self.plan_history = [{}] # TODO
+        self.plan_memory = BaseMemory(openai_api_key=openai_api_key, **cfg.plan_memory)
         self.plan_base_prompt = read_file("modules/prompts/plan_base.md")
         self.plan_memory.add(role="system", content=self.plan_base_prompt)
         
         self.plan_switch_node = PlanSwitchNode(openai_api_key, memory=self.plan_memory, **cfg.plan_switch)
-        self.plan_writing_node = PlanWritingNode(openai_api_key, memory=self.plan_memory, **cfg.plan_writing)
+        self.plan_write_node = PlanWriteNode(openai_api_key, memory=self.plan_memory, **cfg.plan_write)
         self.plan_answer_node = PlanAnswerNode(openai_api_key, memory=self.plan_memory, **cfg.plan_answer)
 
-    def step(self, query: str):
+    def step(self, query: str) -> dict:
         mode = self.plan_switch_node.step(query)
+        result = {"mode": mode, "plan": self.plan, "response": None}
+
         if mode == 0:
-            return self.plan_writing_node.step(query)
+            self.plan = self.plan_write_node.step(query)
+            result.update({"plan": self.plan})
+            self.plan_history.append(self.plan)
         else:
-            return self.plan_answer_node.step(query)
+            result.update({"response": self.plan_answer_node.step(query)}) # TODO
+            self.plan_history.append(self.plan_history[-1])
+
+        return result
+    
+    def revert(self):
+        if len(self.plan_memory.memory) <= 2:
+            self.restart()
+        else:
+            self.plan_memory.pop(2)
+            self.plan_history.pop()
+            self.plan = self.plan_history[-1]
+
+    def restart(self):
+        self.plan_history = [{}] # TODO
+        self.plan = {}
+        self.plan_memory.clear()
+        self.plan_memory.add(role="system", content=self.plan_base_prompt)
+
+    def load_plan(self, plan: dict):
+        assert all(key in plan["游戏策划"] for key in ["所需代码", "游戏玩法", "所需素材"])
+        self.plan = plan
 
 
 class CodePipeline:
-    def __init__(self, openai_api_key):
+    def __init__(self, plan: dict):
         cfg = OmegaConf.load("config.yaml")
+        openai_api_key = cfg.openai_api_key
 
-        self.code_memory = Memory(openai_api_key=openai_api_key, **cfg.code_memory)
-        self.code_base_prompt = read_file("modules/prompts/codebase_base.md")
+        self.code = {}
+        self.code_history = [{}] # TODO
+        self.revert_steps = []
+        self.code_memory = BaseMemory(openai_api_key=openai_api_key, **cfg.code_memory)
+        self.code_base_prompt = read_file("modules/prompts/code_base.md")
         self.code_memory.add(role="system", content=self.code_base_prompt)
+        self.code_write_prompt = read_file("modules/prompts/code_write.md")
 
-        self.code_writing_prompt = read_file("modules/prompts/code_writing.md")
-
-        self.read_plan_node = ReadPlanNode(memory=self.code_memory)
-        self.code_writing_node = CodeWritingNode(openai_api_key, memory=self.code_memory, **cfg.code_writing)
-        self.code_insight_node = CodeInsightNode(openai_api_key, memory=self.code_memory, **cfg.code_insight)
+        self.plan_read_node = PlanReadNode(memory=self.code_memory)
+        self.code_write_node = CodeWriteNode(openai_api_key, memory=self.code_memory, **cfg.code_write)
         self.code_answer_node = CodeAnswerNode(openai_api_key, memory=self.code_memory, **cfg.code_answer)
         self.code_switch_node = CodeSwitchNode(openai_api_key, memory=self.code_memory, **cfg.code_switch)
         self.code_ranking_node = CodeRankingNode(openai_api_key, memory=self.code_memory, **cfg.code_ranking)
+        self.code_insight_node = CodeInsightNode(openai_api_key, memory=self.code_memory, **cfg.code_insight)
 
-        self.step_memory_count = 0
+        self.plan = plan
+        assert all(key in self.plan["游戏策划"] for key in ["所需代码", "游戏玩法", "所需素材"])
+        self.plan_read_node.step(self.plan)
 
-        if not os.path.exists("assets/code_memo.json"): # TODO
-            dump_json("assets/code_memo.json", {})
-        
-        if not os.path.exists("assets/code_buffer.json"): # TODO
-            dump_json("assets/code_buffer.json", {})
+    def load_code(self, code: dict):
+        self.code = code
+        self.code_history[-1] = self.code
+    
+    def init_step(self) -> dict:
+        self.code_memory.add(role="system", content=self.code_write_prompt)
+        commit_files = list(self.plan["游戏策划"]["所需代码"].keys())
 
-    def init_step(self):
-        initial_memory_len = len(self.code_memory.memory)
-        self.read_plan_node.step()
-        self.code_memory.add(role="system", content=self.code_writing_prompt)
+        for filename in commit_files:
+            # yield f"{filename}" TODO
+            self.code = self.code_write_node.step(self.code, filename)
 
-        plan_ = load_json("assets/plan.json") # TODO
-        code_files = list(plan_["游戏策划"]["所需代码"].keys())
-
-        code_buffer = load_json("assets/code_buffer.json") # TODO
-        keys_to_remove = [key for key in code_buffer.keys() if key not in code_files]
-        for key in keys_to_remove:
-            code_buffer.pop(key)
-
-        dump_json("assets/code_buffer.json", code_buffer) # TODO
-        dump_json("assets/code_memo.json", code_buffer) # TODO
-
-        for filename in code_files:
-            yield f"{filename}"
-            self.code_writing_node.step(filename)
-
-        self.step_memory_count = len(self.code_memory.memory) - initial_memory_len
-        return list("已更新代码素材。")
+        self.revert_steps.append(len(commit_files) + 1)
+        self.code_history.append(self.code)
+        return {"code": self.code, "mode": 0, "response": None}
 
     def insight_step(self):
-        return self.code_insight_node.step()
+        self.revert_steps.append(2)
+        self.code_history.append(self.code_history[-1])
+        return {"mode": 1, "response": self.code_insight_node.step(), "code": self.code}
 
-    def step(self, query: str):
-        initial_memory_len = len(self.code_memory.memory)
+    def step(self, query: str) -> dict:
         mode = self.code_switch_node.step(query)
+        result = {"mode": mode, "code": self.code, "response": None}
 
         if mode == 0:
-            code_files = self.code_ranking_node.step(query)
-            for filename in code_files:
-                # yield f"{filename}"
-                self.code_writing_node.step(filename)
+            commit_files = self.code_ranking_node.step(self.code, query)
+            assert all(filename in self.code.keys() for filename in commit_files) # TODO
+            
+            for filename in commit_files:
+                # yield f"{filename}" TODO
+                self.code = self.code_write_node.step(self.code, filename)
 
-            return list("已更新代码素材。")
+            result.update({"code": self.code})
+            self.revert_steps.append(len(commit_files) + 3)
+            self.code_history.append(self.code)
         else:
-            return self.code_answer_node.step(query)
+            result.update({"response": self.code_answer_node.step(self.code, query)})
+            self.revert_steps.append(2)
+            self.code_history.append(self.code_history[-1])
 
-        self.step_memory_count = len(self.code_memory.memory) - initial_memory_len
+        return result
         
-    def pop_step(self):
-        for _ in range(self.step_memory_count):
-            self.code_memory.pop()
-        self.step_memory_count = 0
-
-
-class ImgGenPipeline:
-    def __init__(self):
-        cfg = OmegaConf.load("config.yaml")
-        openai_api_key = cfg.openai_api_key
+    def revert(self):
+        if len(self.code_memory.memory) <= 3:
+            self.restart()
+        else:
+            self.code_memory.pop(self.revert_steps.pop())
+            self.code_history.pop()
+            self.code = self.code_history[-1]
+    
+    def restart(self):
+        self.code_history = [{}] # TODO
+        self.code = {}
+        self.code_memory.clear()
+        self.code_memory.add(role="system", content=self.code_base_prompt)
+        self.plan_read_node.step(self.plan)
         
-        self.img_memory = Memory(openai_api_key=openai_api_key, **cfg.img_memory)
-        self.img_base_prompt = read_file("modules/prompts/img_gen_base.md")
-        self.img_memory.add(role="system", content=self.img_base_prompt)
-        
-        self.read_plan_node = ReadPlanNode(memory=self.img_memory)
-        self.read_plan_node.step()
 
-        self.img_gen_node = ImgGenNode(openai_api_key, memory=self.img_memory, **cfg.img_gen)
-        
-    def step(self, query: str):
-        try:
-            return self.img_gen_node.step(query)
-        except requests.exceptions.RequestException as e:
-            return ["网络错误，请重试。"]
-
-
-class SceneGenPipeline:
-    def __init__(self):
+class ImagePipeline:
+    def __init__(self, plan: dict):
         cfg = OmegaConf.load("config.yaml")
         openai_api_key = cfg.openai_api_key
 
-        self.scene_gen_memory = Memory(openai_api_key=openai_api_key, **cfg.scene_gen_memory)
+        self.images = {}
+        self.images_history = [{}] # TODO
+        self.revert_steps = []
+        self.image_gen_memory = BaseMemory(openai_api_key=openai_api_key, **cfg.image_gen_memory)
+        self.image_base_prompt = read_file("modules/prompts/image_base.md")
+        self.image_gen_memory.add(role="system", content=self.image_base_prompt)
+
+        self.plan_read_node = PlanReadNode(memory=self.image_gen_memory)
+        self.image_gen_node = ImageGenNode(openai_api_key, memory=self.image_gen_memory, **cfg.image_gen)
+        self.image_ranking_node = ImageRankingNode(openai_api_key, memory=self.image_gen_memory, **cfg.image_ranking)
+
+        self.plan = plan
+        assert all(key in self.plan["游戏策划"] for key in ["所需代码", "游戏玩法", "所需素材"])
+        self.plan_read_node.step(self.plan)
+
+    def load_images(self, images: dict):
+        self.images = images
+        self.images_history[-1] = self.images
+
+    def init_step(self) -> dict:
+        commit_files = list(self.plan["游戏策划"]["所需素材"].keys())
+
+        for filename in commit_files:
+            # yield f"{filename}" TODO
+            self.images = self.image_gen_node.step(self.images, filename)
+
+        self.revert_steps.append(len(commit_files) * 2)
+        self.images_history.append(self.images)
+        return self.images
+
+    def step(self, query: str) -> dict:
+        commit_files = self.image_ranking_node.step(self.images, query)
+
+        for filename in commit_files:
+            # yield f"{filename}" TODO
+            self.images = self.image_gen_node.step(self.images, filename)
+
+        self.revert_steps.append(len(commit_files) * 2 + 3)
+        self.images_history.append(self.images)
+        return self.images
+
+    def remove_background(self):
+        for filename in self.images.keys():
+            if self.images[filename]["type"] == 0:
+                self.images[filename]["image"] = remove_background(self.images[filename]["image"])
+        
+        return self.images
+
+    def revert(self):
+        if len(self.image_gen_memory.memory) <= 3:
+            self.restart()
+        else:
+            self.image_gen_memory.pop(self.revert_steps.pop())
+            self.images_history.pop()
+            self.images = self.images_history[-1]
+
+    def restart(self):
+        self.image_gen_memory.clear()
+        self.image_gen_memory.add(role="system", content=self.image_base_prompt)
+        self.plan_read_node.step(self.plan)
+        self.images_history = [{}] # TODO
+        self.images = {}
+
+
+class SceneGenPipeline: # TODO
+    def __init__(self, plan: dict):
+        cfg = OmegaConf.load("config.yaml")
+        openai_api_key = cfg.openai_api_key
+
+        self.plan = plan
+        self.scene_gen_memory = BaseMemory(openai_api_key=openai_api_key, **cfg.scene_gen_memory)
         self.scene_gen_prompt = read_file("modules/prompts/scene_gen.md")
 
         self.scene_gen_node = SceneGenNode(openai_api_key, memory=self.scene_gen_memory, **cfg.scene_gen)
         self.scene_gen_memory.add(role="system", content=self.scene_gen_prompt)
-        self.read_plan_node = ReadPlanNode(memory=self.scene_gen_memory)
+        self.plan_read_node = PlanReadNode(memory=self.scene_gen_memory)
+        self.plan_read_node.step(plan)
         
     def step(self):
-        self.read_plan_node.step()
-        self.scene_gen_node.step()
+        self.restart()
+        self.plan_read_node.step()
+        scene = self.scene_gen_node.step()
+        return scene
+
+    def restart(self):
+        self.scene_gen_memory.clear()
+        self.scene_gen_memory.add(role="system", content=self.scene_gen_prompt)
+        self.plan_read_node.step(self.plan)

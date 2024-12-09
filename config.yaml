@@ -3,9 +3,9 @@ openai_api_key: ""
 plan_switch:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
-  k: 3
+  memory_length: 3
 
-plan_writing:
+plan_write:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
 
@@ -19,13 +19,7 @@ plan_memory:
   temperature: 0.3
   model: "gpt-4o-mini"
 
-code_memory:
-  max_tokens: 110000
-  compressed_tokens: 8000
-  temperature: 0.2
-  model: "gpt-4o-mini"
-
-code_writing:
+code_write:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
 
@@ -36,32 +30,36 @@ code_insight:
 code_ranking:
   model: "gpt-4o-2024-08-06"
   temperature: 0.1
-  k: 5
+  memory_length: 5
 
 code_answer:
   model: "gpt-4o-mini"
   temperature: 0.2
-  k: 5
+  memory_length: 5
 
 code_switch:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
-  k: 3
+  memory_length: 3
 
-img_memory:
+code_memory:
   max_tokens: 110000
   compressed_tokens: 8000
   temperature: 0.2
   model: "gpt-4o-mini"
 
-img_gen:
+image_gen:
   model: "gpt-4o-2024-08-06"
-  img_model: "dall-e-3"
+  image_gen_model: "dall-e-3"
   size: "1024x1024" # 1792x1024
   quality: "standard"
   temperature: 0.4
 
-scene_gen_memory:
+image_ranking:
+  model: "gpt-4o-2024-08-06"
+  temperature: 0.1
+
+image_gen_memory:
   max_tokens: 110000
   compressed_tokens: 8000
   temperature: 0.2
@@ -70,3 +68,9 @@ scene_gen_memory:
 scene_gen:
   model: "gpt-4o-2024-08-06"
   temperature: 0.0
+
+scene_gen_memory:
+  max_tokens: 110000
+  compressed_tokens: 8000
+  temperature: 0.2
+  model: "gpt-4o-mini"

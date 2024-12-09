@@ -1,15 +1,15 @@
 import requests
 from copy import deepcopy
+from openai import OpenAI
 from abc import ABC, abstractmethod
 from tenacity import retry, stop_after_attempt, wait_exponential
-from openai import OpenAI, RateLimitError, APIConnectionError, AuthenticationError
 
 from .utils import *
-from .memory import Memory
+from .memory import BaseMemory
 
 
 class BaseNode(ABC):
-    def __init__(self, memory: Memory):
+    def __init__(self, memory: BaseMemory):
         self.memory = memory
 
     @abstractmethod
@@ -21,7 +21,7 @@ class LLMNode(ABC):
     def __init__(self, openai_api_key, 
         model: str, 
         temperature: float, 
-        memory: Memory,
+        memory: BaseMemory,
         max_retries: int = 3,
         retry_delay: float = 1.0
     ):
@@ -44,19 +44,20 @@ class LLMNode(ABC):
 
 class PlanSwitchNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.0, 
-        k: int = 3
+        memory_length: int = 3
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.k = k
+
+        self.memory_length = memory_length
         self.plan_switch_prompt = read_file("modules/prompts/plan_switch.md")
         self.plan_switch_format = load_json("modules/formats/plan_switch.json")
 
     def step(self, query: str):
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_[:self.k]
+        memory_ = memory_[:self.memory_length]
         memory_.append({"role": "user", "content": query})
         memory_.append({"role": "system", "content": self.plan_switch_prompt})
 
@@ -72,14 +73,15 @@ class PlanSwitchNode(LLMNode):
         return mode
 
 
-class PlanWritingNode(LLMNode):
+class PlanWriteNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.1, 
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.plan_writing_format = load_json("modules/formats/plan_writing.json")
+        
+        self.plan_write_format = load_json("modules/formats/plan_write.json")
 
     def step(self, query: str):
         self.memory.add(role="user", content=query)
@@ -88,7 +90,7 @@ class PlanWritingNode(LLMNode):
             model=self.model,
             temperature=self.temperature,
             messages=self.memory.memory,
-            response_format=self.plan_writing_format
+            response_format=self.plan_write_format
         )
 
         response = completion.choices[0].message.content
@@ -101,7 +103,7 @@ class PlanWritingNode(LLMNode):
 
 class PlanAnswerNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.2, 
     ):
@@ -122,37 +124,39 @@ class PlanAnswerNode(LLMNode):
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content
                 response.append(content)
-                yield content
+                # yield content TODO
 
-        self.memory.add(role="assistant", content="".join(response))
+        full_response = "".join(response)
+        self.memory.add(role="assistant", content=full_response)
+        return full_response
 
 
-class ReadPlanNode(BaseNode):
-    def __init__(self, memory: Memory):
+class PlanReadNode(BaseNode):
+    def __init__(self, memory: BaseMemory):
         super().__init__(memory)
 
-    def step(self):
-        plan = load_json("assets/plan.json") # TODO
-        response = "当前已有策划案内容如下：\n" + str(plan) if plan else "当前没有策划案，请先生成。"
+    def step(self, plan: dict):
+        response = "当前已有策划案内容如下：\n" + str(plan) if plan else "当前没有策划案，需要先生成。"
         self.memory.add(role="assistant", content=response)
         return response
 
 
-class CodeWritingNode(LLMNode):
+class CodeWriteNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.0
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.code_writing_format = load_json("modules/formats/code_writing.json")
 
-    def step(self, filename: str):
+        self.code_write_format = load_json("modules/formats/code_write.json")
+
+    def step(self, code: dict, filename: str) -> dict:
         memory_ = deepcopy(self.memory.memory)
-        codes = load_json("assets/code_buffer.json") # TODO
 
-        if codes.get(filename):
-            memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。该文件已有代码内容如下：\n{codes[filename]}"})
+        if code.get(filename):
+            memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。该文件已有代码内容如下：\n{code[filename]}"})
+            assert self.memory.count_memory_tokens() + count_tokens(str(code[filename])) < 128000
         else:
             memory_.append({"role": "assistant", "content": f"现在，请生成或修改{filename}文件的代码。当前该代码文件为空。"})
         
@@ -160,26 +164,24 @@ class CodeWritingNode(LLMNode):
             model=self.model,
             temperature=self.temperature,
             messages=memory_,
-            response_format=self.code_writing_format
+            response_format=self.code_write_format
         )
 
         response = completion.choices[0].message.content
-        print(f"CODE WRITING INTO {filename}:\n", response)
-        codes[filename] = json.loads(response)["code"]
-        dump_json("assets/code_buffer.json", codes) # TODO
+        assert "code" in json.loads(response)
+        code[filename] = json.loads(response)["code"]
         self.memory.add(role="assistant", content=response)
-        return response
+        return code
 
 
 class CodeInsightNode(LLMNode):
-    # Deprecated
-
     def __init__(self, openai_api_key,
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.5
     ):
         super().__init__(openai_api_key, model, temperature, memory)
+
         self.code_insight_prompt = read_file("modules/prompts/code_insight.md")
 
     def step(self):
@@ -197,32 +199,34 @@ class CodeInsightNode(LLMNode):
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content
                 response.append(content)
-                yield content
+                # yield content TODO
 
-        self.memory.add(role="assistant", content="".join(response))
+        full_response = "".join(response)
+        self.memory.add(role="assistant", content=full_response)
+        return full_response
 
 
 class CodeRankingNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.1,
-        k: int = 1
+        memory_length: int = 1
     ):
         super().__init__(openai_api_key, model, temperature, memory)
+
         self.code_ranking_prompt = read_file("modules/prompts/code_ranking.md")
         self.code_ranking_format = load_json("modules/formats/code_ranking.json")
-        self.k = k
+        self.memory_length = memory_length
 
-    def step(self, query: str):
+    def step(self, code: dict, query: str):
         self.memory.add(role="system", content=self.code_ranking_prompt)
         self.memory.add(role="user", content=query)
-        memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
 
-        codes = load_json("assets/code_buffer.json") # TODO
-        codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
-        memory_.append({"role": "assistant", "content": codes_json})
+        memory_ = deepcopy(self.memory.memory)
+        memory_ = memory_ if len(memory_) <= self.memory_length else [memory_[0]] + memory_[-self.memory_length:]
+        memory_.append({"role": "assistant", "content": "当前已有代码文件如下：\n" + str(code) if code else "当前没有代码，请先生成。"})
+        assert self.memory.count_memory_tokens() + count_tokens(str(code)) < 128000
 
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -239,19 +243,20 @@ class CodeRankingNode(LLMNode):
 
 class CodeSwitchNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.0, 
-        k: int = 1
+        memory_length: int = 3
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.k = k
+
+        self.memory_length = memory_length
         self.code_switch_prompt = read_file("modules/prompts/code_switch.md")
         self.code_switch_format = load_json("modules/formats/code_switch.json")
 
     def step(self, query: str):
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
+        memory_ = memory_ if len(memory_) <= self.memory_length else [memory_[0]] + memory_[-self.memory_length:]
         memory_.append({"role": "user", "content": query})
         memory_.append({"role": "system", "content": self.code_switch_prompt})
 
@@ -269,22 +274,21 @@ class CodeSwitchNode(LLMNode):
 
 class CodeAnswerNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.2,
-        k: int = 3
+        memory_length: int = 3
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.k = k
+        self.memory_length = memory_length
 
-    def step(self, query: str):
+    def step(self, code: dict, query: str):
         self.memory.add(role="user", content=query)
 
         memory_ = deepcopy(self.memory.memory)
-        memory_ = memory_ if len(memory_) <= self.k else [memory_[0]] + memory_[-self.k:]
-        codes = load_json("assets/code_buffer.json") # TODO
-        codes_json = "当前已有代码文件如下：\n" + str(codes) if codes else "当前没有代码，请先生成。"
-        memory_.append({"role": "assistant", "content": codes_json})
+        memory_ = memory_ if len(memory_) <= self.memory_length else [memory_[0]] + memory_[-self.memory_length:]
+        memory_.append({"role": "assistant", "content": "当前已有代码文件如下：\n" + str(code) if code else "当前没有代码，请先生成。"})
+        assert self.memory.count_memory_tokens() + count_tokens(str(code)) < 128000
 
         completion = self.client.chat.completions.create(
             model=self.model,
@@ -298,72 +302,96 @@ class CodeAnswerNode(LLMNode):
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content
                 response.append(content)
-                yield content
+                # yield content TODO
 
-        self.memory.add(role="assistant", content="".join(response))
+        full_response = "".join(response)   
+        self.memory.add(role="assistant", content=full_response)
+        return full_response
 
 
-class ImgGenNode(LLMNode):
+class ImageGenNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06",
-        img_model: str = "dall-e-3",
+        image_gen_model: str = "dall-e-3",
         size: str = "1792x1024",
         quality: str = "standard",
         temperature: float = 0.2
     ):
         super().__init__(openai_api_key, model, temperature, memory)
-        self.img_gen_format = load_json("modules/formats/img_gen.json")
-        self.size = size
-        self.img_model = img_model
-        self.quality = quality
 
-    def step(self, query: str):
+        self.image_gen_format = load_json("modules/formats/image_gen.json")
+        self.size = size
+        self.quality = quality
+        self.image_gen_model = image_gen_model
+
+    def step(self, images: dict, filename: str):
+        self.memory.add(role="assistant", content=f"现在，请生成或修改{filename}图片对应的stable diffusion 生成提示词。")
+
+        completion = self.client.chat.completions.create(
+            model=self.model,
+            temperature=self.temperature,
+            messages=self.memory.memory,
+            response_format=self.image_gen_format
+        )
+
+        response = completion.choices[0].message.content
+        self.memory.add(role="assistant", content=response)
+        response_dict = json.loads(response)
+
+        assert ".png" in filename
+
+        if filename not in images:
+            images[filename] = {}
+
+        images[filename]["prompt"] = response_dict["prompt"]
+        images[filename]["type"] = response_dict["type"]
+
+        completion = self.client.images.generate(
+            model=self.image_gen_model,
+            prompt=response_dict["prompt"],
+            size=self.size,
+            quality=self.quality,
+            response_format="b64_json",
+            n=1,
+        )
+
+        image_base64 = completion.data[0].b64_json
+        images[filename]["image"] = image_base64        
+        return images
+
+
+class ImageRankingNode(LLMNode):
+    def __init__(self, openai_api_key, 
+        memory: BaseMemory,
+        model: str = "gpt-4o-2024-08-06", 
+        temperature: float = 0.1,
+    ):
+        super().__init__(openai_api_key, model, temperature, memory)
+
+        self.image_ranking_prompt = read_file("modules/prompts/image_ranking.md")
+        self.image_ranking_format = load_json("modules/formats/image_ranking.json")
+
+    def step(self, images: dict, query: str):
+        self.memory.add(role="system", content=self.image_ranking_prompt)
         self.memory.add(role="user", content=query)
 
         completion = self.client.chat.completions.create(
             model=self.model,
             temperature=self.temperature,
             messages=self.memory.memory,
-            response_format=self.img_gen_format
+            response_format=self.image_ranking_format
         )
 
-        response = completion.choices[0].message.content
-        response_dict = json.loads(response)
-        dump_json("assets/images.json", response_dict) # TODO
-
-        for item in response_dict["images"]:
-            prompt = item["prompt"]
-            filename = item["filename"] 
-            img_type = item["type"]
-
-            assert ".png" in filename
-            yield f"{filename}"
-
-            completion = self.client.images.generate(
-                model=self.img_model,
-                prompt=prompt,
-                size=self.size,
-                quality=self.quality,
-                n=1,
-            )
-
-            image_url = completion.data[0].url
-            response = requests.get(image_url) # return base64
-
-            if response.status_code == 200:
-                with open(f"assets/images/{filename}", "wb") as f: # TODO
-                    f.write(response.content)
-
-            if img_type == 0:
-                remove_bg_with_rembg(f"assets/images/{filename}", f"assets/images/{filename}")
-        
-        return list("已生成图片。")
+        image_files = json.loads(completion.choices[0].message.content)["image_files"]
+        self.memory.add(role="assistant", content=f"经过分析，对于当前用户意图：{query}，需要改动或新增的图片如下：\n{image_files}")
+        assert isinstance(image_files, list)
+        return image_files
 
 
 class SceneGenNode(LLMNode):
     def __init__(self, openai_api_key, 
-        memory: Memory,
+        memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
         temperature: float = 0.0
     ):
@@ -380,5 +408,4 @@ class SceneGenNode(LLMNode):
 
         response = completion.choices[0].message.content
         response_dict = json.loads(response)
-        dump_json("assets/scripts/SampleScene.json", response_dict) # TODO
-        return 
+        return response_dict
