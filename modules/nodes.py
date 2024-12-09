@@ -84,7 +84,7 @@ class PlanWritingNode(LLMNode):
     def step(self, query: str):
         self.memory.add(role="user", content=query)
         
-        completion =  self.client.chat.completions.create(
+        completion = self.client.chat.completions.create(
             model=self.model,
             temperature=self.temperature,
             messages=self.memory.memory,
@@ -92,12 +92,11 @@ class PlanWritingNode(LLMNode):
         )
 
         response = completion.choices[0].message.content
+        self.memory.add(role="assistant", content=response)
+
         response_dict = json.loads(response)
         response_dict = json.loads(json.dumps(response_dict).replace('\\n', ''))
-        dump_json("assets/plan.json", response_dict) # TODO
-
-        self.memory.add(role="assistant", content=response)
-        return response
+        return response_dict
 
 
 class PlanAnswerNode(LLMNode):

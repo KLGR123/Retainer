@@ -6,8 +6,9 @@ from .utils import *
 
 
 class PlanPipeline:
-    def __init__(self, openai_api_key):
+    def __init__(self):
         cfg = OmegaConf.load("config.yaml")
+        openai_api_key = cfg.openai_api_key
 
         self.plan_memory = Memory(openai_api_key=openai_api_key, **cfg.plan_memory)
         self.plan_base_prompt = read_file("modules/prompts/plan_base.md")
@@ -20,8 +21,7 @@ class PlanPipeline:
     def step(self, query: str):
         mode = self.plan_switch_node.step(query)
         if mode == 0:
-            self.plan_writing_node.step(query)
-            return list("已更新游戏策划。")
+            return self.plan_writing_node.step(query)
         else:
             return self.plan_answer_node.step(query)
 
@@ -100,8 +100,9 @@ class CodePipeline:
 
 
 class ImgGenPipeline:
-    def __init__(self, openai_api_key):
-        cfg = OmegaConf.load("config.yaml") # TODO
+    def __init__(self):
+        cfg = OmegaConf.load("config.yaml")
+        openai_api_key = cfg.openai_api_key
         
         self.img_memory = Memory(openai_api_key=openai_api_key, **cfg.img_memory)
         self.img_base_prompt = read_file("modules/prompts/img_gen_base.md")
@@ -120,12 +121,14 @@ class ImgGenPipeline:
 
 
 class SceneGenPipeline:
-    def __init__(self, openai_api_key):
-        cfg = OmegaConf.load("config.yaml") # TODO
+    def __init__(self):
+        cfg = OmegaConf.load("config.yaml")
+        openai_api_key = cfg.openai_api_key
 
         self.scene_gen_memory = Memory(openai_api_key=openai_api_key, **cfg.scene_gen_memory)
-        self.scene_gen_node = SceneGenNode(openai_api_key, memory=self.scene_gen_memory, **cfg.scene_gen)
         self.scene_gen_prompt = read_file("modules/prompts/scene_gen.md")
+
+        self.scene_gen_node = SceneGenNode(openai_api_key, memory=self.scene_gen_memory, **cfg.scene_gen)
         self.scene_gen_memory.add(role="system", content=self.scene_gen_prompt)
         self.read_plan_node = ReadPlanNode(memory=self.scene_gen_memory)
         

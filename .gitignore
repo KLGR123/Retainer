@@ -1,5 +1,5 @@
 .DS_Store
 *.pyc
-.streamlit/secrets.toml
+secrets.toml
 
 __pycache__/

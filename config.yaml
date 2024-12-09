@@ -1,4 +1,4 @@
-openai_api_key: "" # .streamlit/secrets.toml
+openai_api_key: ""
 
 plan_switch:
   model: "gpt-4o-2024-08-06"
