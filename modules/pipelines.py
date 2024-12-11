@@ -205,7 +205,7 @@ class ImagePipeline:
         self.images = {}
 
 
-class SceneGenPipeline: # TODO
+class ScenePipeline: # TODO
     def __init__(self, plan: dict):
         cfg = OmegaConf.load("config.yaml")
         openai_api_key = cfg.openai_api_key
