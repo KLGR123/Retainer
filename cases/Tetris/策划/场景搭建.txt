@@ -1,4 +1,0 @@
-1、创建一个网格Grid，并设置大小
-2、创建一个棋盘空物体并放置Board代码与Piece代码，放置Grid组件，创建Tilemap子物体
-3、创建一个阴影空物体并放置Ghost代码，放置Grid组件，创建Tilemap子物体
-4、利用图片素材创建Tile，为Borad代码添加Tetrominoes元素，构建方块

@@ -49,7 +49,7 @@ class PlanPipeline:
         self.plan_memory.add(role="system", content=self.plan_base_prompt)
 
     def load_plan(self, plan: dict):
-        assert all(key in plan["游戏策划"] for key in ["所需代码", "游戏玩法", "所需素材"])
+        assert all(key in plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
         self.plan = plan
 
 
@@ -74,7 +74,7 @@ class CodePipeline:
         self.code_insight_node = CodeInsightNode(openai_api_key, memory=self.code_memory, **cfg.code_insight)
 
         self.plan = plan
-        assert all(key in self.plan["游戏策划"] for key in ["所需代码", "游戏玩法", "所需素材"])
+        assert all(key in self.plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
         self.plan_read_node.step(self.plan)
 
     def load_code(self, code: dict):
@@ -83,7 +83,7 @@ class CodePipeline:
     
     def init_step(self) -> dict:
         self.code_memory.add(role="system", content=self.code_write_prompt)
-        commit_files = list(self.plan["游戏策划"]["所需代码"].keys())
+        commit_files = ["index.html", "style.css", "script.js"]
 
         for filename in commit_files:
             # yield f"{filename}" TODO
@@ -137,6 +137,7 @@ class CodePipeline:
         
 
 class ImagePipeline:
+    # deprecated
     def __init__(self, plan: dict):
         cfg = OmegaConf.load("config.yaml")
         openai_api_key = cfg.openai_api_key
@@ -206,6 +207,7 @@ class ImagePipeline:
 
 
 class ScenePipeline: # TODO
+    # deprecated
     def __init__(self, plan: dict):
         cfg = OmegaConf.load("config.yaml")
         openai_api_key = cfg.openai_api_key

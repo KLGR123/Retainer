@@ -207,6 +207,7 @@ class CodeInsightNode(LLMNode):
 
 
 class CodeRankingNode(LLMNode):
+    # deprecated
     def __init__(self, openai_api_key, 
         memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
@@ -310,6 +311,7 @@ class CodeAnswerNode(LLMNode):
 
 
 class ImageGenNode(LLMNode):
+    # deprecated
     def __init__(self, openai_api_key, 
         memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06",
@@ -362,6 +364,7 @@ class ImageGenNode(LLMNode):
 
 
 class ImageRankingNode(LLMNode):
+
     def __init__(self, openai_api_key, 
         memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 
@@ -390,6 +393,7 @@ class ImageRankingNode(LLMNode):
 
 
 class SceneGenNode(LLMNode):
+    # deprecated
     def __init__(self, openai_api_key, 
         memory: BaseMemory,
         model: str = "gpt-4o-2024-08-06", 

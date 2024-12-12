@@ -1,2 +1,0 @@
-1、创建空物体并命名为【StackCube】，挂载【Stack.cs】
-2、在【StackCube】上创建10个子物体【Unity的Cube】
