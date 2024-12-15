@@ -49,7 +49,7 @@ class PlanPipeline:
         self.plan_memory.add(role="system", content=self.plan_base_prompt)
 
     def load_plan(self, plan: dict):
-        assert all(key in plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
+        # assert all(key in plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
         self.plan = plan
 
 
@@ -74,7 +74,7 @@ class CodePipeline:
         self.code_insight_node = CodeInsightNode(openai_api_key, memory=self.code_memory, **cfg.code_insight)
 
         self.plan = plan
-        assert all(key in self.plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
+        # assert all(key in self.plan["游戏策划"] for key in ["游戏玩法", "所需素材"])
         self.plan_read_node.step(self.plan)
 
     def load_code(self, code: dict):

@@ -6,10 +6,11 @@
             "type": "object",
             "properties": {
                 "游戏策划": {
-                    "description": "游戏的详细策划，目前只包括游戏玩法即可",
+                    "description": "游戏的详细策划，包括游戏玩法和所需素材",
                     "type": "object",
                     "properties": {
-                        "游戏玩法": {"description": "游戏的玩法", "type": "string"}
+                        "游戏玩法": {"description": "游戏的玩法", "type": "string"},
+                        "所需素材": {"description": "游戏所需的素材", "type": "object"}
                     }
                 }
             }

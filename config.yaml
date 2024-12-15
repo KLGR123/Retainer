@@ -65,12 +65,16 @@ image_gen_memory:
   temperature: 0.2
   model: "gpt-4o-mini"
 
-scene_gen:
-  model: "gpt-4o-2024-08-06"
-  temperature: 0.0
-
-scene_gen_memory:
-  max_tokens: 110000
-  compressed_tokens: 8000
-  temperature: 0.2
-  model: "gpt-4o-mini"
+game_list:
+  - "俄罗斯方块"
+  - "五子棋"
+  - "跳一跳"
+  - "2048"
+  - "扫雷"
+  - "推箱子"
+  - "马里奥闯关"
+  - "打地鼠"
+  - "打砖块"
+  - "打气球"
+  - "打字游戏"
+  - "贪吃蛇"

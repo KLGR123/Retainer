@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>游戏开发助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        .chat-container {
+            height: calc(100vh - 80px);
+        }
+        .messages {
+            height: calc(100vh - 160px);
+            overflow-y: auto;
+        }
+        .message {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: 20%;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            margin-right: 20%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8 h-screen">
+        <div class="flex gap-4 h-full">
+            <!-- 游戏预览区域 -->
+            <div class="w-2/3 bg-white rounded-lg shadow-lg p-4 h-full">
+                <!-- <h2 class="text-xl font-bold mb-4">游戏预览</h2> -->
+                <iframe id="gameFrame" src="/output/index.html" class="w-full h-full border-0 rounded-lg"></iframe>
+            </div>
+
+            <!-- 聊天区域 -->
+            <div class="w-1/3 bg-white rounded-lg shadow-lg h-full">
+                <div class="flex flex-col h-full p-4">
+                    <h2 class="text-xl font-bold mb-4">Retainer-H5</h2>
+                    <div class="messages flex-1 overflow-y-auto mb-4" id="messages"></div>
+                    <div class="mt-auto">
+                        <textarea id="userInput" class="w-full p-2 border rounded" rows="3" placeholder="输入您的问题或指令..."></textarea>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="restartPipeline()" class="mt-2 bg-black text-white px-4 py-2 rounded hover:bg-red-700">Restart</button>
+                            <button onclick="sendMessage()" class="mt-2 bg-black text-white px-4 py-2 rounded hover:bg-green-800">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const messages = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const gameFrame = document.getElementById('gameFrame');
+
+        function addMessage(content, isUser) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            div.textContent = content;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                socket.emit('user_message', message);
+                userInput.value = '';
+            }
+        }
+
+        function restartPipeline() {
+            socket.emit('restart_pipeline');
+            gameFrame.src = '/output/index.html'; // 重新加载iframe
+        }
+
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        socket.on('bot_response', function(data) {
+            addMessage(data.content, false);
+            if (data.type === 'code') {
+                gameFrame.src = gameFrame.src; // 刷新iframe
+            }
+        });
+    </script>
+</body>
+</html>

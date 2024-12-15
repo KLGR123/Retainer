@@ -5,3 +5,5 @@ tenacity
 rembg
 openai
 onnxruntime
+flask
+flask-socketio
